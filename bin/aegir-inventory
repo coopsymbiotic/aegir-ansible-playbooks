@@ -1,0 +1,49 @@
+#!/bin/bash -e
+
+# Command line script for Ansible Dynamic inventory.
+#
+# Based on:
+# https://www.drupal.org/project/aegir_ansible
+#
+#  This script does not have to be in the Aegir Ansible module folder.
+#  Copy it to the same folder you are running the "ansible" command for convenience.
+#
+#  Pass the path to this script to the `ansible` command using the `-i` option:
+#
+#      $ ansible aegir_servers -m ping -u aegir -i /path/to/aegir_ansible/aegir_ansible_inventory/ansible-inventory.php
+#
+#  This command will attempt to SSH into all of the "aegir_servers" as the "aegir" user,
+#  and run ansible's "ping" module.
+#
+#  An environment variable determines what Aegir Hostmaster to use as the inventory.
+#
+#      $ export AEGIR_HOSTMASTER_HOSTNAME=aegir.myserver.com
+#      $ ansible -i /path/to/aegir_ansible/aegir_ansible_inventory/ansible-inventory
+#
+#  If the environment variable is not set, it will attempt to use localhost.
+
+hostname=''
+
+if [ -n "$AEGIR_HOSTMASTER_HOSTNAME" ]; then
+  hostname=$AEGIR_HOSTMASTER_HOSTNAME
+else
+  hostname=$(hostname -f)
+fi
+
+# Workaround for when hostmaster is http only
+proto="https"
+if [ -f "/var/aegir/config/.flag-http-hostmaster" ]; then
+  proto="http"
+fi
+
+query_args="$AEGIR_INVENTORY_ARGS"
+
+# Get JSON from an Aegir server.
+if [ "$AEGIR_INVENTORY_LOCAL" == "" ]; then
+  # Running remotely, run via ssh because this page is restricted by IP
+  # fixme: hardcoded ansible user
+  ssh deploy@${hostname} curl --silent "https://${hostname}/inventory${query_args}"
+else
+  # Running locally on the Aegir server
+  curl --insecure --silent "${proto}://${hostname}/inventory${query_args}"
+fi
