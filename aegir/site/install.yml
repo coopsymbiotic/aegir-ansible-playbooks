@@ -29,6 +29,7 @@
         login_password: "{{ hostvars[db_host]['db']['db_passwd'] }}"  
 
     - name: Install Drupal 10
+      become_user: aegir
       shell: 
         chdir: "{{ site_path }}"
         cmd: "drush site-install {{ profile }} --db-url=mysql://{{ db_name }}:{{ db_passwd }}@{{ db_host }}:{{ db_port }}/{{ db_name}} --site-name={{ inventory_hostname }} --sites-subdir={{ inventory_hostname }} --site-mail=fixme@example.org --locale=en"
@@ -49,5 +50,21 @@
         creates: "{{ site_path }}/settings.php"
       when: software == "Backdrop"
 
+    - name: Create the nginx vhost
+      template:
+        src: "vhost-nginx.conf"
+        dest: "/var/aegir/config/server_master/nginx/vhost.d/{{ inventory_hostname }}"
+        owner: root
+        group: root
+        mode: 0644
+      notify:
+        - reload nginx
+
     # generate the vhost
     # run fix ownership/permission
+
+  handlers:
+  - name: reload nginx
+    service:
+      name: nginx
+      state: reloaded

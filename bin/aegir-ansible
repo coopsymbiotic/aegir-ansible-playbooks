@@ -37,11 +37,8 @@ if [ -n "$tag" ]; then
 
   # Limit to 2 tasks in parallel because running many DB upgrades can overload the system
   # Check for the new aegir-ansible syntax for aegir-on-backdrop
-  if [[ "$tag" == *.yml ]]; then
-    ansible-playbook -f 2 --connection=local -i /usr/local/coopsymbiotic-ansible/bin/aegir-inventory -l $host /usr/local/coopsymbiotic-ansible/aegir/$tag
-  else
-    ansible-playbook -f 2 --connection=local -i /usr/local/coopsymbiotic-ansible/bin/aegir-inventory -l $host --tags $tag /usr/local/coopsymbiotic-ansible/civicrm_site.yml
-  fi
+  ansible-playbook -f 2 --connection=local -i /usr/local/aegir-ansible-playbooks/bin/aegir-inventory -l $host /usr/local/aegir-ansible-playbooks/aegir/$tag
 else
-  ansible-playbook -f 2 --connection=local -i /usr/local/coopsymbiotic-ansible/bin/aegir-inventory -l $host /usr/local/coopsymbiotic-ansible/civicrm_site.yml
+  echo "Error: missing playbook"
+  exit 1
 fi
