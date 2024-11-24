@@ -1,0 +1,52 @@
+---
+
+- hosts: all
+  tasks:
+    - name: Check if the http cert already exists
+      stat:
+        path: "/var/aegir/config/letsencrypt.d/{{ inventory_hostname }}/fullchain.pem"
+      register: cert
+
+    - name: Check if the dhparams file exists
+      stat:
+        path: "/etc/nginx/params.4096"
+      register: dhparams
+
+    - name: Create the nginx vhost
+      template:
+        src: "vhost-nginx.conf"
+        dest: "/var/aegir/config/server_master/nginx/vhost.d/{{ inventory_hostname }}"
+        owner: root
+        group: root
+        mode: 0644
+      notify:
+        - reload nginx
+
+    - name: Generate an https certificate
+      shell:
+        chdir: "/var/aegir"
+        cmd: "dehydrated --accept-terms -c -d {{ inventory_hostname }} -f /var/aegir/config/letsencrypt/config"
+        creates: "/var/aegir/config/letsencrypt.d/{{ inventory_hostname }}/fullchain.pem"
+
+    - name: Check if the http cert already exists
+      stat:
+        path: "/var/aegir/config/letsencrypt.d/{{ inventory_hostname }}/fullchain.pem"
+      register: cert
+
+    - name: Update the nginx vhost again for https
+      template:
+        src: "vhost-nginx.conf"
+        dest: "/var/aegir/config/server_master/nginx/vhost.d/{{ inventory_hostname }}"
+        owner: root
+        group: root
+        mode: 0644
+      notify:
+        - reload nginx
+
+    # run fix ownership/permission
+
+  handlers:
+  - name: reload nginx
+    service:
+      name: nginx
+      state: reloaded

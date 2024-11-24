@@ -1,0 +1,19 @@
+---
+
+- hosts: all
+  tasks:
+    - name: Update the site status to Enabled
+      shell:
+        chdir: "/var/aegir/admin/web"
+        cmd: "/usr/local/bin/bee hosting-site-update-status --status=1 {{ nid }}"
+
+    # Not sure if necessary, or other weird bug
+    - name: Flush the cache
+      shell:
+        chdir: "/var/aegir/admin/web"
+        cmd: "/usr/local/bin/bee cc core"
+
+    - name: Run provision-verify
+      shell:
+        chdir: "/var/aegir/admin/web"
+        cmd: "/usr/local/bin/bee hosting-site-task {{ inventory_hostname }} verify"
