@@ -1,0 +1,4 @@
+# {{ ansible_managed }}
+WELLKNOWN="/var/aegir/config/letsencrypt.d/well-known/acme-challenge"
+DOMAINS_TXT="/var/aegir/config/letsencrypt/domains.txt"
+PARAM_CERTDIR="/var/aegir/config/letsencrypt.d/"

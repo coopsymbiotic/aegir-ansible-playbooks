@@ -29,6 +29,7 @@
         login_password: "{{ hostvars[db_host]['db']['db_passwd'] }}"  
 
     - name: Install Drupal 10
+      become: true
       become_user: aegir
       shell: 
         chdir: "{{ site_path }}"
@@ -37,6 +38,8 @@
       when: software == "Drupal" and version is version('10.0.0', '>') 
 
     - name: Install Drupal 7
+      become: true
+      become_user: aegir
       shell: 
         chdir: "{{ site_path }}"
         cmd: "drush -y site-install {{ profile }} --db-url=mysql://{{ db_name }}:{{ db_passwd }}@{{ db_host }}:{{ db_port }}/{{ db_name}} --site-name={{ inventory_hostname }} --sites-subdir={{ inventory_hostname }} --site-mail=fixme@example.org --locale=en"
@@ -44,11 +47,23 @@
       when: software == "Drupal" and version is version('10.0.0', '<')
 
     - name: Install Backdrop
+      become: true
+      become_user: aegir
       shell: 
         chdir: "{{ site_path }}"
         cmd: "bee -y site-install {{ profile }} --db-name={{ db_name }} --db-user={{ db_name }} --db-pass={{ db_passwd }} --db-host={{ db_host }} --site-name={{ inventory_hostname }} --sites-subdir={{ inventory_hostname }} --site-mail=fixme@example.org --locale=en --auto"
         creates: "{{ site_path }}/settings.php"
       when: software == "Backdrop"
+
+    - name: Check if the http cert already exists
+      stat:
+        path: "/var/aegir/config/letsencrypt.d/{{ inventory_hostname }}/fullchain.pem"
+      register: cert
+
+    - name: Check if the dhparams file exists
+      stat:
+        path: "/etc/nginx/params.4096"
+      register: dhparams
 
     - name: Create the nginx vhost
       template:
@@ -60,7 +75,27 @@
       notify:
         - reload nginx
 
-    # generate the vhost
+    - name: Generate an https certificate
+      shell:
+        chdir: "/var/aegir"
+        cmd: "dehydrated --accept-terms -c -d {{ inventory_hostname }} -f /var/aegir/config/letsencrypt/config"
+        creates: "/var/aegir/config/letsencrypt.d/{{ inventory_hostname }}/fullchain.pem"
+
+    - name: Check if the http cert already exists
+      stat:
+        path: "/var/aegir/config/letsencrypt.d/{{ inventory_hostname }}/fullchain.pem"
+      register: cert
+
+    - name: Update the nginx vhost again for https
+      template:
+        src: "vhost-nginx.conf"
+        dest: "/var/aegir/config/server_master/nginx/vhost.d/{{ inventory_hostname }}"
+        owner: root
+        group: root
+        mode: 0644
+      notify:
+        - reload nginx
+
     # run fix ownership/permission
 
   handlers:
