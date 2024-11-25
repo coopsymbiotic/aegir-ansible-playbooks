@@ -1,0 +1,9 @@
+---
+
+- name: WordPress | Generate a one-time-link
+  become: true
+  become_user: aegir
+  shell:
+    chdir: "{{ site_path }}"
+    cmd: "wp user one-time-login"
+  register: onetime

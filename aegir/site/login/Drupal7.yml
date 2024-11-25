@@ -1,0 +1,9 @@
+---
+
+- name: Drupal7 | Generate a one-time-link
+  become: true
+  become_user: aegir
+  shell:
+    chdir: "{{ site_path }}"
+    cmd: "drush uli"
+  register: onetime

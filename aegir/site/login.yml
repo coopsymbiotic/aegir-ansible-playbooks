@@ -1,0 +1,13 @@
+---
+
+- hosts: all
+  tasks:
+    - name: Run CMS-specific tasks
+      include_tasks: "login/{{ software }}.yml"
+
+    - name: Send the link to the frontend
+      become: true
+      become_user: aegir
+      shell:
+        chdir: "/var/aegir/admin/web"
+        cmd: "/usr/local/bin/bee hosting-site-login {{ nid }} {{ onetime.stdout }}"

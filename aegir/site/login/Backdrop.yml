@@ -1,0 +1,9 @@
+---
+
+- name: Backdrop | Generate a one-time-link
+  become: true
+  become_user: aegir
+  shell:
+    chdir: "{{ site_path }}"
+    cmd: "bee uli"
+  register: onetime
