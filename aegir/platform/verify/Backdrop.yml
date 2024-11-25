@@ -1,0 +1,5 @@
+---
+
+- name: Todo not implemented yet
+  debug:
+    msg: "Not implemented yet. Detect install profiles?"

@@ -2,20 +2,8 @@
 
 - hosts: all
   tasks:
-    - name: Run drupal fix platform ownership
-      shell:
-        chdir: "{{ publish_path }}"
-        cmd: "/usr/local/bin/fix-drupal-platform-ownership.sh --root={{ publish_path }} --script-user=aegir --web-group=www-data"
-
-    - name: Run drupal fix platform permissions
-      shell:
-        chdir: "{{ publish_path }}"
-        cmd: "/usr/local/bin/fix-drupal-platform-permissions.sh --root={{ publish_path }}"
-
-    - name: Detect platform packages
-      shell:
-        chdir: "/var/aegir/admin/web"
-        cmd: "/usr/local/bin/bee hosting-platform-detect-packages {{ nid }}"
+    - name: Run CMS-specific tasks
+      include_tasks: "verify/{{ software }}.yml"
 
     - name: Update the platform status
       shell:

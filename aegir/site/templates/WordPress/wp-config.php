@@ -1,0 +1,42 @@
+<?php
+
+if (is_readable("{{ site_path }}/local.wp-config.php")) {
+  require_once "{{ site_path }}/local.wp-config.php";
+}
+
+if (!defined('DB_NAME')) {
+  define('DB_NAME', "{{ db_name }}");
+}
+
+/** MySQL database username */
+if (!defined('DB_USER')) {
+  define('DB_USER', "{{ db_name }}");
+}
+
+/** MySQL database password */
+if (!defined('DB_PASSWORD')) {
+  define('DB_PASSWORD', "{{ db_passwd }}");
+}
+
+/** MySQL hostname */
+if (!defined('DB_HOST')) {
+  define('DB_HOST', "{{ db_host }}");
+}
+
+/** Database Charset to use in creating database tables. */
+if (!defined('DB_CHARSET')) {
+  define('DB_CHARSET', 'utf8');
+}
+
+/** The Database Collate type. Don't change this if in doubt. */
+if (!defined('DB_COLLATE')) {
+  define('DB_COLLATE', '');
+}
+
+/** Content directory */
+if (!defined('WP_CONTENT_DIR')) {
+  define('WP_CONTENT_DIR', "{{ site_path }}/wp-content");
+}
+if (!defined('WP_CONTENT_URL')) {
+  define('WP_CONTENT_URL', "https://{{ inventory_hostname }}/sites/{{ inventory_hostname }}/wp-content");
+}

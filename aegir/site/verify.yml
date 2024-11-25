@@ -22,6 +22,9 @@
       notify:
         - reload nginx
 
+    - name: Force the nginx reload to happen now so that the well-known route works
+      meta: flush_handlers
+
     - name: Generate an https certificate
       shell:
         chdir: "/var/aegir"

@@ -1,0 +1,9 @@
+---
+
+- name: Install Backdrop
+  become: true
+  become_user: aegir
+  shell:
+    chdir: "{{ site_path }}"
+    cmd: "bee -y site-install {{ profile }} --db-name={{ db_name }} --db-user={{ db_name }} --db-pass={{ db_passwd }} --db-host={{ db_host }} --site-name={{ inventory_hostname }} --sites-subdir={{ inventory_hostname }} --site-mail=fixme@example.org --locale=en --auto"
+    creates: "{{ site_path }}/settings.php"

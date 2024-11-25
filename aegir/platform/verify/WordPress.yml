@@ -1,0 +1,17 @@
+---
+
+- name: Create the wp-config.php file for the platform
+  template:
+    src: "WordPress/wp-config.php"
+    dest: "{{ publish_path }}/wp-config.php"
+    owner: aegir
+    group: aegir
+    mode: 0444
+
+- name: Create the user.ini file for the platform
+  template:
+    src: "WordPress/user.ini"
+    dest: "{{ publish_path }}/.user.ini"
+    owner: aegir
+    group: aegir
+    mode: 0444

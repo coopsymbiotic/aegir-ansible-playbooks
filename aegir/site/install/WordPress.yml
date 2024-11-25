@@ -1,0 +1,17 @@
+---
+
+- name: Create the wp-config.php file for the site
+  template:
+    src: "WordPress/wp-config.php"
+    dest: "{{ site_path }}/wp-config.php"
+    owner: aegir
+    group: www-data
+    mode: 0440
+
+- name: Install WordPress
+  become: true
+  become_user: aegir
+  shell:
+    chdir: "{{ site_path }}"
+    cmd: "wp core install --url={{ inventory_hostname }} --title={{ inventory_hostname }} --admin_user=symbiotic --admin_email=fixme@example.org --admin_password=changeme"
+    creates: "{{ site_path }}/wp-content"
