@@ -1,0 +1,14 @@
+# {{ ansible_managed }}
+
+[Unit]
+Description="WP-CiviCRM Cron for {{ inventory_hostname }}"
+Requires=wpcivicron_{{ site_shortname }}.service
+
+[Timer]
+Unit=wpcivicron_{{ site_shortname }}.service
+OnUnitInactiveSec={{ civicrm_ansible_cron_interval }}sec
+OnBootSec=10min
+RandomizedDelaySec=30sec
+
+[Install]
+WantedBy=timers.target

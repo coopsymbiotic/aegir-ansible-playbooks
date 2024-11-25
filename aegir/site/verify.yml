@@ -46,10 +46,15 @@
       notify:
         - reload nginx
 
-    # run fix ownership/permission
+    - name: Run CMS-specific tasks
+      include_tasks: "verify/{{ software }}.yml"
 
   handlers:
   - name: reload nginx
     service:
       name: nginx
       state: reloaded
+
+  - name: reload systemd
+    systemd:
+      daemon_reload: yes

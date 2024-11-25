@@ -1,0 +1,120 @@
+---
+
+- name: WordPress | Run fix permissions
+  shell:
+    chdir: "{{ site_path }}"
+    cmd: "/usr/local/aegir-ansible-playbooks/bin/fix-wordpress-permissions.sh --site-path='{{ site_path }}'"
+  tags:
+    - wordpress-fixpermissions
+
+# Make sure we have correct symlinks for the global plugins
+- include_tasks: WordPress/symlinks.yml
+  loop:
+    - { root_dir: "{{ site_root }}", subdir: "plugins" }
+    - { root_dir: "{{ site_root }}", subdir: "themes" }
+  loop_control:
+    loop_var: symlink_options
+  tags:
+    - wordpress-symlinks
+
+- name: WordPress | Check for a client-custom directory for global plugins and themes
+  stat: path=/var/aegir/client-custom/wordpress
+  register: p
+  tags:
+    - wordpress-symlinks
+
+- include_tasks: WordPress/symlinks.yml
+  loop:
+    - { root_dir: "/var/aegir/client-custom/wordpress", subdir: "plugins" }
+    - { root_dir: "/var/aegir/client-custom/wordpress", subdir: "themes" }
+  loop_control:
+    loop_var: symlink_options
+  when: p.stat.exists
+  tags:
+    - wordpress-symlinks
+
+- name: WordPress | Check if CiviCRM is enabled
+  become: true
+  become_user: aegir
+  shell:
+    chdir: "{{ site_path }}"
+    cmd: "wp plugin list --status=active --name=civicrm --format=count"
+  register: civicrm_is_active
+
+# If the site was migrated, update a few obvious options that should not cause harm
+# although updating the siteurl/home is perhaps a bit opiniated
+- name: WordPress | Update the wpLoadPhp civicrm_setting
+  become: true
+  become_user: aegir
+  shell:
+    chdir: "{{ site_path }}"
+    cmd: "wp civicrm api Setting.create wpLoadPhp={{ site_root }}/wp-load.php"
+  when: civicrm_is_active.stdout == "1"
+
+- name: WordPress | Update WP home option
+  become: true
+  become_user: aegir
+  shell:
+    chdir: "{{ site_path }}"
+    cmd: wp option update home "https://{{ inventory_hostname}}"
+
+- name: WordPress | Update WP siteurl option
+  become: true
+  become_user: aegir
+  shell:
+    chdir: "{{ site_path }}"
+    cmd: wp option update siteurl "https://{{ inventory_hostname}}"
+
+- name: WordPress | Update WP database
+  become: true
+  become_user: aegir
+  shell:
+    chdir: "{{ site_path }}"
+    cmd: wp core update-db
+
+- name: WordPress | Flush the WP cache
+  become: true
+  become_user: aegir
+  shell:
+    chdir: "{{ site_path }}"
+    cmd: wp cache flush
+
+- name: WordPress | Run civicrm database upgrades
+  become: true
+  become_user: aegir
+  shell:
+    chdir: "{{ site_path }}"
+    cmd: cv --no-interaction --out=json-pretty upgrade:db
+  when: civicrm_is_active.stdout == "1"
+
+- name: WordPress | Update logging schema as a precaution after upgrades
+  become: true
+  become_user: aegir
+  shell:
+    chdir: "{{ site_path }}"
+    cmd: cv php:script /var/aegir/hostmaster/profiles/hostmaster/modules/aegir/hosting_civicrm/cv/schemalog.php
+  when: civicrm_is_active.stdout == "1"
+  ignore_errors: yes
+  tags:
+    - schemalog
+    - wordpress-schemalog
+
+# @todo Check if upgrades are necessary, to avoid using ignore_errors:yes
+- name: WordPress | Run civicrm extension database upgrades
+  become: true
+  become_user: aegir
+  shell:
+    chdir: "{{ site_path }}"
+    cmd: wp civicrm api Extension.upgrade
+  when: civicrm_is_active.stdout == "1"
+  ignore_errors: yes
+
+# @todo Remove the cron if the CiviCRM plugin is disabled
+- include_tasks: WordPress/civicrm-cron.yml
+  when: "'civicrm_sites' in group_names"
+  tags:
+    - cron-wpcivicrm
+
+- include_tasks: WordPress/wpcore-cron.yml
+  tags:
+    - cron-wpcore
