@@ -1,0 +1,23 @@
+---
+
+- hosts: all
+  tasks:
+    - name: Delete the nginx vhost
+      file:
+        path: "/var/aegir/config/server_master/nginx/vhost.d/{{ inventory_hostname }}"
+        state: absent
+
+    - name: Delete the site directory
+      file:
+        path: "{{ site_path }}"
+        state: absent
+
+    - name: Delete the letsencrypt cert
+      file:
+        path: "/var/aegir/config/letsencrypt.d/{{ inventory_hostname }}"
+        state: absent
+
+    - name: Update the site status to Deleted
+      shell:
+        chdir: "/var/aegir/admin/web"
+        cmd: "/usr/local/bin/bee hosting-site-update-status --status=-2 {{ nid }}"
