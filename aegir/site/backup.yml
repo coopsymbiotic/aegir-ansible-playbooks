@@ -1,0 +1,47 @@
+---
+
+- hosts: all
+  tasks:
+    - name: Change the site directory permissions temporarily
+      file:
+        path: "{{ site_path }}"
+        state: directory
+        mode: 0750
+
+    - name: Generate a database dump
+      shell:
+        chdir: "{{ site_path }}"
+        cmd: "drush -l {{ inventory_hostname }} sql-dump --result-file={{ site_path }}/database.sql"
+        creates: "{{ site_path }}/database.sql"
+
+    - name: Remove DEFINERs for views and procedures
+      shell:
+        chdir: "{{ site_path }}"
+        cmd: "perl -i -pe 's#\\/\\*\\!5001[7|3].*?`[^\\*]*\\*\\/##g;' -pe 's/DEFINER=[^ ]+//g' ./database.sql"
+
+    - name: Drupal10 | Run fix permissions
+      shell:
+        chdir: "{{ site_path }}"
+        cmd: "/usr/local/aegir-ansible-playbooks/bin/fix-drupal-permissions.sh --site-path='{{ site_path }}'"
+      tags:
+        - drupal-fixpermissions
+      when: software == "Drupal10"
+
+    - name: Drupal10 | tar
+      shell:
+        chdir: "{{ site_path }}"
+        cmd: "tar cpf /var/aegir/backups/backup-test.tar.gz {{ site_path }}"
+      when: software == "Drupal10"
+
+  # TODO: exclude directories
+
+    - name: Delete the local SQL dump
+      file:
+        path: "{{ site_path }}/database.sql"
+        state: absent
+
+    - name: Change the site directory permissions back to normal
+      file:
+        path: "{{ site_path }}"
+        state: directory
+        mode: 0550
