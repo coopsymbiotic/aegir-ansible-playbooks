@@ -2,6 +2,10 @@
 
 - hosts: all
   tasks:
+    - name: Generate a filename for the backup using the timestamp
+      shell: "echo {{ inventory_hostname }}-$(date +%Y%m%d%H%M%S).tar"
+      register: filename
+
     - name: Change the site directory permissions temporarily
       file:
         path: "{{ site_path }}"
@@ -30,7 +34,7 @@
     - name: Drupal10 | tar
       shell:
         chdir: "{{ site_path }}"
-        cmd: "tar cpf /var/aegir/backups/backup-test.tar.gz {{ site_path }}"
+        cmd: "tar cpf /var/aegir/backups/{{ filename.stdout }} {{ site_path }}"
       when: software == "Drupal10"
 
   # TODO: exclude directories
@@ -45,3 +49,11 @@
         path: "{{ site_path }}"
         state: directory
         mode: 0550
+
+    # We check stdout because bee does not exit non-zero on errors
+    - name: Store the filename of the backup in the frontend
+      shell:
+        chdir: "/var/aegir/admin/web"
+        cmd: "/usr/local/bin/bee hosting-site-backup {{ nid }} {{ filename.stdout }}"
+      register: result
+      failed_when: "result.stdout != ''"
