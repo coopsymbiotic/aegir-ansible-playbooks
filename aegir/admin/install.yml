@@ -1,0 +1,30 @@
+---
+
+- hosts: localhost
+  connection: local
+  vars:
+    aegir_user: aegir
+    aegir_web_group: www-data
+    aegir_root: /var/aegir
+    bee_version: 1.x-1.1.0
+  tasks:
+    - name: Install base OS dependencies
+      include_tasks: "install/debian.yml"
+
+    - name: Create the aegir user
+      include_tasks: "install/user.yml"
+
+    - name: Download bee
+      include_tasks: "install/bee.yml"
+
+    - name: Download the platform
+      include_tasks: "install/platform.yml"
+
+# Todo:
+# - ln -s /usr/local/aegir-ansible-playbooks/bin/aegir-ansible /usr/local/bin/
+# - Create a database
+# - Launch the Backdrop installation with bee
+# - Enable the hosting module
+# - Add the 'server' (nginx/mysql)
+# - Add the hostmaster platform
+# - Configure the systemd unit for hosting-queued

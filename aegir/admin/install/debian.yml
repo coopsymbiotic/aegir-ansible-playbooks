@@ -1,0 +1,23 @@
+---
+
+- apt: name={{ item }} state=present install_recommends=no
+  with_items:
+    - nginx
+    - dehydrated
+    - python3-pymysql
+
+# @todo maybe we should just use the Debian package, but it has a lot of dependencies and it is old
+- name: Download and install the latest Composer
+  shell: curl -sS https://getcomposer.org/installer | php
+  args:
+    chdir: /tmp
+    creates: /tmp/composer.phar
+
+- name: Move Composer to usr local bin
+  copy: 
+    dest: /usr/local/bin/composer
+    group: root
+    mode: '0755'
+    owner: root
+    src: /tmp/composer.phar
+    remote_src: yes

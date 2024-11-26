@@ -1,0 +1,34 @@
+---
+
+- name: platform | Deploy the aegir-on-backdrop git repo
+  git: repo=https://github.com/coopsymbiotic/aegir-on-backdrop.git
+       version=master
+       dest="/var/aegir/admin"
+       update=yes
+       force=yes
+  become: true
+  become_user: "{{ aegir_user }}"
+
+- name: platform | Download BackdropCMS
+  shell:
+    chdir: "{{ aegir_root }}/admin/"
+    cmd: "/usr/local/bin/bee dl-core web"
+    creates: "{{ aegir_root }}/admin/web"
+  become: true
+  become_user: "{{ aegir_user }}"
+
+- name: platform | Download the vbo module
+  shell:
+    chdir: "{{ aegir_root }}/admin/"
+    cmd: "/usr/local/bin/bee dl views_bulk_operations"
+    creates: "{{ aegir_root }}/admin/modules/views_bulk_operations"
+  become: true
+  become_user: "{{ aegir_user }}"
+
+- name: platform | Run composer install to download Aegir hosting modules
+  shell:
+    chdir: "{{ aegir_root }}/admin/"
+    cmd: "composer install"
+    creates: "{{ aegir_root }}/admin/modules/hosting"
+  become: true
+  become_user: "{{ aegir_user }}"

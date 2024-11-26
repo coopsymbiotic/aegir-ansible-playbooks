@@ -1,0 +1,7 @@
+---
+
+- name: bee | Download bee
+  get_url:
+    url="https://github.com/backdrop-contrib/bee/releases/download/{{ bee_version }}/bee.phar"
+    dest="/usr/local/bin/bee"
+    mode=0755
