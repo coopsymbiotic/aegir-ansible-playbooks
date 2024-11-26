@@ -1,3 +1,8 @@
---
+---
 
-# todo: fix permissions
+- name: Drupal10 | Run fix permissions
+  shell:
+    chdir: "{{ site_path }}"
+    cmd: "/usr/local/aegir-ansible-playbooks/bin/fix-drupal-permissions.sh --site-path='{{ site_path }}'"
+  tags:
+    - drupal-fixpermissions
