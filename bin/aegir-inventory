@@ -32,8 +32,10 @@ fi
 
 # Workaround for when hostmaster is http only
 proto="https"
+port=443
 if [ -f "/var/aegir/config/.flag-http-hostmaster" ]; then
   proto="http"
+  port=80
 fi
 
 query_args="$AEGIR_INVENTORY_ARGS"
@@ -45,5 +47,6 @@ if [ "$AEGIR_INVENTORY_LOCAL" == "" ]; then
   ssh deploy@${hostname} curl --silent "https://${hostname}/inventory${query_args}"
 else
   # Running locally on the Aegir server
-  curl --insecure --silent "${proto}://${hostname}/inventory${query_args}"
+  # Use 'resolve' to force the request to be from 127.0.0.1 for allow/deny rules
+  curl --resolve $hostname:443:127.0.0.1 --insecure --silent "${proto}://${hostname}/inventory${query_args}"
 fi
