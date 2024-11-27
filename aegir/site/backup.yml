@@ -17,6 +17,14 @@
         chdir: "{{ site_path }}"
         cmd: "drush -l {{ inventory_hostname }} sql-dump --result-file={{ site_path }}/database.sql"
         creates: "{{ site_path }}/database.sql"
+      when: software == "Drupal10"
+
+    - name: Backdrop | Generate a database dump
+      shell:
+        chdir: "{{ site_path }}"
+        cmd: "bee sql-dump {{ site_path }}/database.sql"
+        creates: "{{ site_path }}/database.sql"
+      when: software == "Backdrop"
 
     - name: Remove DEFINERs for views and procedures
       shell:
@@ -35,7 +43,6 @@
       shell:
         chdir: "{{ site_path }}"
         cmd: "tar cpf /var/aegir/backups/{{ filename.stdout }} {{ site_path }}"
-      when: software == "Drupal10"
 
   # TODO: exclude directories
 
@@ -54,6 +61,6 @@
     - name: Store the filename of the backup in the frontend
       shell:
         chdir: "/var/aegir/admin/web"
-        cmd: "/usr/local/bin/bee hosting-site-backup {{ nid }} {{ filename.stdout }}"
+        cmd: "/usr/local/bin/bee hosting-site-backup {{ nid }} {{ filename.stdout }} {{ task }}"
       register: result
       failed_when: "result.stdout != ''"
