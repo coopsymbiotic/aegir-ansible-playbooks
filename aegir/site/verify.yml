@@ -29,9 +29,12 @@
       shell:
         chdir: "/var/aegir"
         cmd: "dehydrated --accept-terms -c -d {{ inventory_hostname }} -f /var/aegir/config/letsencrypt/config"
-        creates: "/var/aegir/config/letsencrypt.d/{{ inventory_hostname }}/fullchain.pem"
+      register: certlog
 
-    - name: Check if the http cert already exists
+    # Always display the output, often requires debugging
+    - debug: var=certlog.stdout_lines
+
+    - name: Check again if the http cert exists
       stat:
         path: "/var/aegir/config/letsencrypt.d/{{ inventory_hostname }}/fullchain.pem"
       register: cert
