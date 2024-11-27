@@ -2,8 +2,10 @@
 
 - apt: name={{ item }} state=present install_recommends=no
   with_items:
+    - curl
     - nginx
     - dehydrated
+    - pwgen
     - python3-pymysql
 
 # @todo maybe we should just use the Debian package, but it has a lot of dependencies and it is old

@@ -1,0 +1,39 @@
+---
+
+- name: Get the hostname
+  shell: hostname -f
+  register: hostname
+
+- name: Install Backdrop
+  become: true
+  become_user: aegir
+  shell:
+    chdir: "{{ aegir_home }}/admin/web"
+    cmd: "bee -y site-install --db-name={{ aegir_db_name }} --db-user={{ aegir_db_name }} --db-pass={{ aegirpass.stdout }} --db-host={{ aegir_db_host }} --site-name={{ hostname.stdout }} --sites-subdir={{ hostname.stdout }} --site-mail={{ aegir_admin_email }} --locale=en --auto"
+    creates: "{{ aegir_home }}/admin/web/settings.php"
+
+# FIXME: this is a workaround because our common vhost stuff aliases /files to /sites/xx/files
+# but maybe we should not use that common vhost
+- name: Create a dummy site directory because of the Aegir vhost
+  file:
+    path: "{{ aegir_home }}/admin/web/sites/{{ hostname.stdout }}"
+    state: directory
+    mode: 0775
+    owner: "{{ aegir_user }}"
+    group: "{{ aegir_web_group }}"
+
+- name: Create a symbolic link for the files directory
+  ansible.builtin.file:
+    src: "{{ aegir_home }}/admin/web/files"
+    dest: "{{ aegir_home }}/admin/web/sites/{{ hostname.stdout }}/files"
+    owner: "{{ aegir_user }}"
+    group: "{{ aegir_web_group }}"
+    state: link
+
+- name: Fix the files directory permissions
+  file:
+    path: "{{ aegir_home }}/admin/files"
+    state: directory
+    mode: 0775
+    owner: "{{ aegir_user }}"
+    group: "{{ aegir_web_group }}"

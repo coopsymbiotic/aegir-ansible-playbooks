@@ -7,7 +7,7 @@
   user:
     name: "{{ aegir_user }}"
     system: yes
-    home: "{{ aegir_root }}"
+    home: "{{ aegir_home }}"
     group: "{{ aegir_user }}"
     groups: "{{ aegir_web_group }},adm"
     password_lock: false

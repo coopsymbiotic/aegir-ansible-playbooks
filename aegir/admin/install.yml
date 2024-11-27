@@ -5,11 +5,15 @@
   vars:
     aegir_user: aegir
     aegir_web_group: www-data
-    aegir_root: /var/aegir
+    aegir_home: /var/aegir
+    aegir_db_name: aegir
+    aegir_db_host: localhost
+    aegir_admin_email: fixme@example.org
     bee_version: 1.x-1.1.0
   tasks:
     - name: Install base OS dependencies
       include_tasks: "install/debian.yml"
+      tags: admin-install-debian
 
     - name: Create the aegir user
       include_tasks: "install/user.yml"
@@ -20,10 +24,23 @@
     - name: Download the platform
       include_tasks: "install/platform.yml"
 
+    - name: Create a mysql user
+      include_tasks: "install/mysql.yml"
+
+    - name: Install BackdropCMS
+      include_tasks: "install/Backdrop.yml"
+
+    - name: Generate the nginx vhost
+      include_tasks: "install/vhost.yml"
+
+  handlers:
+  - name: reload nginx
+    service:
+      name: nginx
+      state: reloaded
+
 # Todo:
 # - ln -s /usr/local/aegir-ansible-playbooks/bin/aegir-ansible /usr/local/bin/
-# - Create a database
-# - Launch the Backdrop installation with bee
 # - Enable the hosting module
 # - Add the 'server' (nginx/mysql)
 # - Add the hostmaster platform

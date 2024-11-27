@@ -1,0 +1,15 @@
+---
+
+- name: Get the hostname
+  shell: hostname -f
+  register: hostname
+
+- name: Update the nginx vhost again for https
+  template:
+    src: "vhost-nginx.conf"
+    dest: "/var/aegir/config/server_master/nginx/vhost.d/{{ hostname.stdout }}"
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    - reload nginx

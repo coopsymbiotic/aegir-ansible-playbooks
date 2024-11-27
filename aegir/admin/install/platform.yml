@@ -5,30 +5,29 @@
        version=master
        dest="/var/aegir/admin"
        update=yes
-       force=yes
   become: true
   become_user: "{{ aegir_user }}"
 
 - name: platform | Download BackdropCMS
   shell:
-    chdir: "{{ aegir_root }}/admin/"
+    chdir: "{{ aegir_home }}/admin/"
     cmd: "/usr/local/bin/bee dl-core web"
-    creates: "{{ aegir_root }}/admin/web"
+    creates: "{{ aegir_home }}/admin/web"
   become: true
   become_user: "{{ aegir_user }}"
 
 - name: platform | Download the vbo module
   shell:
-    chdir: "{{ aegir_root }}/admin/"
+    chdir: "{{ aegir_home }}/admin/"
     cmd: "/usr/local/bin/bee dl views_bulk_operations"
-    creates: "{{ aegir_root }}/admin/modules/views_bulk_operations"
+    creates: "{{ aegir_home }}/admin/modules/views_bulk_operations"
   become: true
   become_user: "{{ aegir_user }}"
 
 - name: platform | Run composer install to download Aegir hosting modules
   shell:
-    chdir: "{{ aegir_root }}/admin/"
+    chdir: "{{ aegir_home }}/admin/"
     cmd: "composer install"
-    creates: "{{ aegir_root }}/admin/modules/hosting"
+    creates: "{{ aegir_home }}/admin/modules/hosting"
   become: true
   become_user: "{{ aegir_user }}"
