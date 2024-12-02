@@ -12,11 +12,13 @@
         state: directory
         mode: 0750
 
-    - name: Generate a database dump
+    - name: Drupal10 | Generate a database dump
       shell:
         chdir: "{{ site_path }}"
         cmd: "drush -l {{ inventory_hostname }} sql-dump --result-file={{ site_path }}/database.sql"
         creates: "{{ site_path }}/database.sql"
+      become: true
+      become_user: aegir
       when: software == "Drupal10"
 
     - name: Backdrop | Generate a database dump
@@ -24,12 +26,25 @@
         chdir: "{{ site_path }}"
         cmd: "bee sql-dump {{ site_path }}/database.sql"
         creates: "{{ site_path }}/database.sql"
+      become: true
+      become_user: aegir
       when: software == "Backdrop"
+
+    - name: WordPress | Generate a database dump
+      shell:
+        chdir: "{{ site_path }}"
+        cmd: "wp db export {{ site_path }}/database.sql"
+        creates: "{{ site_path }}/database.sql"
+      become: true
+      become_user: aegir
+      when: software == "WordPress"
 
     - name: Remove DEFINERs for views and procedures
       shell:
         chdir: "{{ site_path }}"
         cmd: "perl -i -pe 's#\\/\\*\\!5001[7|3].*?`[^\\*]*\\*\\/##g;' -pe 's/DEFINER=[^ ]+//g' ./database.sql"
+      become: true
+      become_user: aegir
 
     - name: Drupal10 | Run fix permissions
       shell:
@@ -39,10 +54,10 @@
         - drupal-fixpermissions
       when: software == "Drupal10"
 
-    - name: Drupal10 | tar
+    - name: tar all files
       shell:
         chdir: "{{ site_path }}"
-        cmd: "tar cpf /var/aegir/backups/{{ filename.stdout }} {{ site_path }}"
+        cmd: "tar cpf /var/aegir/backups/{{ filename.stdout }} ."
 
   # TODO: exclude directories
 
@@ -64,3 +79,5 @@
         cmd: "/usr/local/bin/bee hosting-site-backup {{ nid }} {{ filename.stdout }} {{ task }}"
       register: result
       failed_when: "result.stdout != ''"
+      become: true
+      become_user: aegir
