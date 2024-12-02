@@ -1,3 +1,9 @@
 ---
 
-# todo
+- name: Create the settings.local.php file
+  template:
+    src="Backdrop/settings.local.php"
+    dest="{{ site_root }}"
+    owner=aegir
+    group=www-data
+    mode=0440
