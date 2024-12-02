@@ -113,8 +113,8 @@
 - include_tasks: WordPress/civicrm-cron.yml
   when: "'civicrm_sites' in group_names"
   tags:
-    - cron-wpcivicrm
+    - cron-civicrm
 
-- include_tasks: WordPress/wpcore-cron.yml
+- include_tasks: WordPress/cms-cron.yml
   tags:
-    - cron-wpcore
+    - cron-cms
