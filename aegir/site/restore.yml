@@ -1,0 +1,59 @@
+---
+
+- hosts: all
+  tasks:
+
+    - name: Create the temporary site restore directory
+      file:
+        path: "{{ site_path }}.restore"
+        state: directory
+        owner: aegir
+        group: www-data
+
+    - name: Untar the backup
+      shell:
+        chdir: "{{ site_path }}.restore"
+        cmd: "tar xf /var/aegir/backups/{{ backup_filename }}"
+        creates: "{{ site_path }}.restore/database.sql"
+
+    - name: Delete the site directory
+      file:
+        path: "{{ site_path }}"
+        state: absent
+
+    - name: Move the restore temporary directory as the new site directory
+      shell:
+        cmd: "mv {{ site_path }}.restore {{ site_path }}"
+        creates: "{{ site_path }}"
+
+    - name: Drupal10 | Import the SQL dump
+      shell:
+        chdir: "{{ site_path }}"
+        cmd: "cat database.sql | drush -l {{ inventory_hostname }} sqlc"
+      when: software == "Drupal10"
+
+    - name: Drupal7 | Import the SQL dump
+      shell:
+        chdir: "{{ site_path }}"
+        cmd: "cat database.sql | drush sqlc"
+      when: software == "Drupal7"
+
+    - name: WordPress | Import the SQL dump
+      shell:
+        chdir: "{{ site_path }}"
+        cmd: "cat database.sql | wp sql cli"
+      when: software == "WordPress"
+
+    - name: Backdrop | Import the SQL dump
+      shell:
+        chdir: "{{ site_path }}"
+        cmd: "cat database.sql | bee sql cli"
+      when: software == "Backdrop"
+
+    - name: Delete the SQL dump
+      file:
+        path: "{{ site_path }}/database.sql"
+        state: absent
+
+# TODO: regenerate settings files
+# TODO: run verify
