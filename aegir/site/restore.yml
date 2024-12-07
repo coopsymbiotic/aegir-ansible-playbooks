@@ -55,5 +55,7 @@
         path: "{{ site_path }}/database.sql"
         state: absent
 
-# TODO: regenerate settings files
-# TODO: run verify
+    - name: Run provision-verify
+      shell:
+        chdir: "/var/aegir/admin/web"
+        cmd: "/usr/local/bin/bee hosting-site-task {{ inventory_hostname }} verify"

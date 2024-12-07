@@ -1,6 +1,8 @@
 ---
 
 - hosts: all
+  vars_files:
+    - defaults.yml
   tasks:
     - name: Check if the http cert already exists
       stat:
