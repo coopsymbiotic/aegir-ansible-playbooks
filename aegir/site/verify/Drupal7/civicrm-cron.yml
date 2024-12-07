@@ -1,10 +1,10 @@
 ---
 
-# Setup the CiviCRM-on-Drupal10 cron
+# Setup the CiviCRM-on-Drupal7 cron
 
 - name: systemd | Setup the Drupal CiviCRM Cron service
   template:
-    src="Drupal10/d7civicron.service"
+    src="Drupal7/d7civicron.service"
     dest="/etc/systemd/system/d7civicron_{{ site_shortname }}.service"
     owner=root
     group=root
@@ -14,7 +14,7 @@
 
 - name: systemd | Setup the WP CiviCRM Cron timer
   template:
-    src="Drupal10/d7civicron.timer"
+    src="Drupal7/d7civicron.timer"
     dest="/etc/systemd/system/d7civicron_{{ site_shortname }}.timer"
     owner=root
     group=root
