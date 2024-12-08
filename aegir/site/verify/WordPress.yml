@@ -56,14 +56,14 @@
   become_user: aegir
   shell:
     chdir: "{{ site_path }}"
-    cmd: wp option update home "https://{{ inventory_hostname}}"
+    cmd: wp option update home "https://{{ inventory_hostname }}"
 
 - name: WordPress | Update WP siteurl option
   become: true
   become_user: aegir
   shell:
     chdir: "{{ site_path }}"
-    cmd: wp option update siteurl "https://{{ inventory_hostname}}"
+    cmd: wp option update siteurl "https://{{ inventory_hostname }}"
 
 - name: WordPress | Update WP database
   become: true
