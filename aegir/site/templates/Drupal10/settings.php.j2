@@ -905,3 +905,18 @@ $databases['default']['default'] = array (
   'autoload' => 'core/modules/mysql/src/Driver/Database/mysql/',
 );
 $settings['config_sync_directory'] = 'sites/{{ inventory_hostname }}/private/config/sync';
+
+# Additional host wide configuration settings. Useful for safely specifying configuration settings.
+if (is_readable('/var/aegir/config/includes/global.inc')) {
+  include('/var/aegir/config/includes/global.inc');
+}
+
+# Additional platform wide configuration settings.
+if (is_readable('{{ site_root }}sites/all/platform.settings.php')) {
+  include('{{ site_root }}sites/all/platform.settings.php');
+}
+
+# Additional site configuration settings.
+if (is_readable('{{ site_path }}/local.settings.php')) {
+  include('{{ site_path }}/local.settings.php');
+}
