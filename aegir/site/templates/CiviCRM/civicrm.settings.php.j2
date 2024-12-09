@@ -70,7 +70,7 @@ if (!defined('CIVICRM_UF')) {
  *      define( 'CIVICRM_UF_DSN', 'mysql://cms_db_username:cms_db_password@db_server/cms_database?new_link=true');
  */
 if (!defined('CIVICRM_UF_DSN') && CIVICRM_UF !== 'UnitTests') {
-  define( 'CIVICRM_UF_DSN'           , 'mysql://{{ db_user }}:{{ db_passwd }}@{{ db_host }}/{{ db_user }}?new_link=true{{ db_ssl | default('') }}');
+  define( 'CIVICRM_UF_DSN'           , 'mysql://{{ db_name }}:{{ db_passwd }}@{{ db_host }}/{{ db_name }}?new_link=true{{ db_ssl | default('') }}');
 }
 
 // Additional settings
@@ -119,7 +119,7 @@ if (!defined('CIVICRM_DSN')) {
     }
   }
   else {
-    define('CIVICRM_DSN', 'mysql://{{ db_user }}:{{ db_passwd }}@{{ db_host }}/{{ db_user }}?new_link=true{{ db_ssl | default('') }}');
+    define('CIVICRM_DSN', 'mysql://{{ db_name }}:{{ db_passwd }}@{{ db_host }}/{{ db_name }}?new_link=true{{ db_ssl | default('') }}');
   }
 }
 
