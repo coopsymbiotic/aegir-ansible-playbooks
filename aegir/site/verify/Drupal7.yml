@@ -7,6 +7,23 @@
   tags:
     - drupal-fixpermissions
 
+- name: Create the settings.php file for the site
+  template:
+    src: "Drupal7/settings.php.j2"
+    dest: "{{ site_path }}/settings.php"
+    owner: aegir
+    group: www-data
+    mode: 0440
+
+- name: Update the CiviCRM settings
+  template:
+    src: "CiviCRM/civicrm.settings.php.j2"
+    dest: "{{ site_path }}/civicrm.settings.php"
+    owner: aegir
+    group: www-data
+    mode: 0440
+  when: civicrm_site_key is defined
+
 # @todo Remove the cron if the CiviCRM plugin is disabled
 - include_tasks: Drupal7/civicrm-cron.yml
   when: "'civicrm_sites' in group_names"

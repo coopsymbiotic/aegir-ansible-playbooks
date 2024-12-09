@@ -7,6 +7,23 @@
   tags:
     - wordpress-fixpermissions
 
+- name: Create the wp-config.php file for the site
+  template:
+    src: "WordPress/wp-config.php.j2"
+    dest: "{{ site_path }}/wp-config.php"
+    owner: aegir
+    group: www-data
+    mode: 0440
+
+- name: Update the CiviCRM settings
+  template:
+    src: "CiviCRM/civicrm.settings.php.j2"
+    dest: "{{ site_path }}/wp-content/uploads/civicrm/civicrm.settings.php"
+    owner: aegir
+    group: www-data
+    mode: 0440
+  when: civicrm_site_key is defined
+
 # Make sure we have correct symlinks for the global plugins
 - include_tasks: WordPress/symlinks.yml
   loop:

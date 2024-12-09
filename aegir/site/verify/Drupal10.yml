@@ -12,8 +12,17 @@
     src: "Drupal10/settings.php.j2"
     dest: "{{ site_path }}/settings.php"
     owner: aegir
-    group: aegir
-    mode: 0444
+    group: www-data
+    mode: 0440
+
+- name: Update the CiviCRM settings
+  template:
+    src: "CiviCRM/civicrm.settings.php.j2"
+    dest: "{{ site_path }}/civicrm.settings.php"
+    owner: aegir
+    group: www-data
+    mode: 0440
+  when: civicrm_site_key is defined
 
 # @todo Remove the cron if the CiviCRM plugin is disabled
 - include_tasks: Drupal10/civicrm-cron.yml
