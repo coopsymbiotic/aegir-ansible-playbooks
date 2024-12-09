@@ -23,7 +23,7 @@
 - name: Install CiviCRM
   shell:
     chdir: "{{ site_path }}"
-    cmd: "cv core:install --cms-base-url=https://{{ inventory_hostname }}/ --lang=en"
+    cmd: "cv core:install --cms-base-url=https://{{ inventory_hostname }}/ --lang=en_US"
     creates: "{{ site_path }}/civicrm.settings.php"
 
 - name: Change the site directory permissions back to normal
