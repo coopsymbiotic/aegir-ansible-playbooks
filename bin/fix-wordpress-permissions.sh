@@ -17,12 +17,16 @@ exit 0
 }
 
 site_path=`pwd`
+force=0
 
 # Parse Command Line Arguments
 while [ "$#" -gt 0 ]; do
   case "$1" in
     --site-path=*)
         site_path="${1#*=}"
+        ;;
+    --force=*)
+        force="${1#*=}"
         ;;
     --help) print_help;;
     *)
@@ -32,9 +36,13 @@ while [ "$#" -gt 0 ]; do
   shift
 done
 
-if [ -z "${site_path}" ] || [ ! -d "${site_path}/wp-content" ] ; then
-  printf "Error: Please provide a valid WordPress site directory.\n"
-  exit 1
+# Sometimes we need to run this to create directories such as wp-content/uploads/civicrm
+# in order to then generate the settings file
+if [ $force == 0 ]; then
+  if [ -z "${site_path}" ] || [ ! -d "${site_path}/wp-content" ] ; then
+    printf "Error: Please provide a valid WordPress site directory.\n"
+    exit 1
+  fi
 fi
 
 if [ $(id -u) != 0 ]; then
@@ -70,6 +78,10 @@ mkdir -p ./wp-content/plugins
 mkdir -p ./wp-content/upgrade
 mkdir -p ./wp-content/uploads
 mkdir -p ./wp-content/themes
+
+if [ -d ../../wp-content/plugins/civicrm ]; then
+  mkdir -p ./wp-content/uploads/civicrm
+fi
 
 # Set the permissions
 # - owner by aegir.www-data (so that Aegir can backup/delete files)
