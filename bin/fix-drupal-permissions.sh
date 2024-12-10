@@ -60,6 +60,10 @@ fi
 
 cd $site_path
 
+if [ ! -d ./private ]; then
+  mkdir ./private
+fi
+
 chown -R ${script_user}:${web_group} .
 find . \( -path "./files" -o -path "./private" -prune \) -type d -exec chmod 750 '{}' \+
 find . \( -path "./files" -o -path "./private" -prune \) -type f -exec chmod 640 '{}' \+
