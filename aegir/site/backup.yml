@@ -72,6 +72,12 @@
         state: directory
         mode: 0550
 
+    - name: Change the permissions on the backup to be owned by aegir
+      file:
+        path: "/var/aegir/backups/{{ filename.stdout }}"
+        owner: aegir
+        group: aegir
+
     # We check stdout because bee does not exit non-zero on errors
     - name: Store the filename of the backup in the frontend
       shell:
