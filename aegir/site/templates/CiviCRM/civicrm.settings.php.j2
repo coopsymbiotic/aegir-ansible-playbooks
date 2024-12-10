@@ -382,11 +382,10 @@ if (!defined('CIVICRM_SITE_KEY')) {
  * More info at https://docs.civicrm.org/sysadmin/en/latest/setup/cred-key/
  */
 if (!defined('CIVICRM_CRED_KEYS') ) {
-  define( '_CIVICRM_CRED_KEYS', '%%credKeys%%');
-  define( 'CIVICRM_CRED_KEYS', _CIVICRM_CRED_KEYS === '%%' . 'credKeys' . '%%' ? '' : _CIVICRM_CRED_KEYS );
-  // Some old installers may not set a decent value, and this extra complexity is a failsafe.
-  // Feel free to simplify post-install.
+  // @todo We should store this key because rotating it will cause problems
+  define('CIVICRM_CRED_KEYS', 'aes-cbc:hkdf-sha256:{{ (inventory_hostname + aegir_salt) | hash('sha256') }}');
 }
+
 if (!defined('CIVICRM_DEPLOY_ID') ) {
   define( '_CIVICRM_DEPLOY_ID', '%%deployID%%');
   define( 'CIVICRM_DEPLOY_ID', _CIVICRM_DEPLOY_ID === '%%' . 'deployID' . '%%' ? '' : _CIVICRM_DEPLOY_ID );
@@ -409,10 +408,8 @@ if (!defined('CIVICRM_DEPLOY_ID') ) {
  * If key-encoding is blank, it will default to "hkdf-sha256".
  */
 if (!defined('CIVICRM_SIGN_KEYS') ) {
-  define( '_CIVICRM_SIGN_KEYS', '%%signKeys%%');
-  define( 'CIVICRM_SIGN_KEYS', _CIVICRM_SIGN_KEYS === '%%' . 'signKeys' . '%%' ? '' : _CIVICRM_SIGN_KEYS );
-  // Some old installers may not set a decent value, and this extra complexity is a failsafe.
-  // Feel free to simplify post-install.
+  // @todo We should store this key because rotating it will cause problems
+  define('CIVICRM_SIGN_KEYS', 'jwt-hs256:hkdf-sha256:{{ (inventory_hostname + aegir_salt) | hash('sha256') }}');
 }
 
 /**
@@ -454,7 +451,11 @@ if (!defined('CIVICRM_DOMAIN_ID')) {
  * NB: defining a value for environment here prevents it from being set
  * via the browser.
  */
+{% if environment is defined %}
+$civicrm_setting['domain']['environment'] = '{{ environment }}';
+{% else %}
 // $civicrm_setting['domain']['environment'] = 'Production';
+{% endif %}
 
 /**
  * Settings to enable external caching using a cache server.  This is an
