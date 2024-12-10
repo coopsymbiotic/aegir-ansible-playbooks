@@ -13,7 +13,7 @@
     - name: Untar the backup
       shell:
         chdir: "{{ site_path }}.restore"
-        cmd: "tar xf /var/aegir/backups/{{ backup_filename }}"
+        cmd: "tar xf /var/aegir/backups/{{ backup_filename }} --exclude='civicrm.settings.php' --exclude='settings.php' --exclude='drushrc.php' --exclude='wp-config.php'"
         creates: "{{ site_path }}.restore/database.sql"
 
     - name: Delete the site directory
@@ -25,6 +25,9 @@
       shell:
         cmd: "mv {{ site_path }}.restore {{ site_path }}"
         creates: "{{ site_path }}"
+
+    - name: Run CMS-specific verify tasks
+      include_tasks: "verify/{{ software }}.yml"
 
     - name: Drupal10 | Import the SQL dump
       shell:
@@ -54,8 +57,3 @@
       file:
         path: "{{ site_path }}/database.sql"
         state: absent
-
-    - name: Run provision-verify
-      shell:
-        chdir: "/var/aegir/admin/web"
-        cmd: "/usr/local/bin/bee hosting-site-task {{ inventory_hostname }} verify"

@@ -1,12 +1,5 @@
 ---
 
-- name: Drupal7 | Run fix permissions
-  shell:
-    chdir: "{{ site_path }}"
-    cmd: "/usr/local/aegir-ansible-playbooks/bin/fix-drupal-permissions.sh --site-path='{{ site_path }}'"
-  tags:
-    - drupal-fixpermissions
-
 - name: Create the settings.php file for the site
   template:
     src: "Drupal7/settings.php.j2"
@@ -23,6 +16,13 @@
     group: www-data
     mode: 0440
   when: civicrm_site_key is defined
+
+- name: Drupal7 | Run fix permissions
+  shell:
+    chdir: "{{ site_path }}"
+    cmd: "/usr/local/aegir-ansible-playbooks/bin/fix-drupal-permissions.sh --site-path='{{ site_path }}'"
+  tags:
+    - drupal-fixpermissions
 
 # @todo Remove the cron if the CiviCRM plugin is disabled
 - include_tasks: Drupal7/civicrm-cron.yml
