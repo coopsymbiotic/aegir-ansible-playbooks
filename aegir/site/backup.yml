@@ -59,8 +59,6 @@
         chdir: "{{ site_path }}"
         cmd: "tar cpf /var/aegir/backups/{{ filename.stdout }} ."
 
-  # TODO: exclude directories
-
     - name: Delete the local SQL dump
       file:
         path: "{{ site_path }}/database.sql"
