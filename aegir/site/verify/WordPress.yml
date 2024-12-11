@@ -7,7 +7,7 @@
   tags:
     - wordpress-fixpermissions
 
-- name: Create the wp-config.php file for the site
+- name: WordPress | Update the site wp-config.php file
   template:
     src: "WordPress/wp-config.php.j2"
     dest: "{{ site_path }}/wp-config.php"
@@ -15,7 +15,7 @@
     group: www-data
     mode: 0440
 
-- name: Update the CiviCRM settings
+- name: WordPress | Update the site civicrm.settings.php file
   template:
     src: "CiviCRM/civicrm.settings.php.j2"
     dest: "{{ site_path }}/wp-content/uploads/civicrm/civicrm.settings.php"
