@@ -10,14 +10,24 @@
         owner: aegir
         group: www-data
 
-    - name: Create the MySQL database
+    # todo: move to separate include
+    - name: Create the MySQL database on remote server
       mysql_db:
         name: "{{ db_name }}"
         state: present
         login_user: "{{ hostvars[db_host]['db']['db_user'] }}"
         login_password: "{{ hostvars[db_host]['db']['db_passwd'] }}"
+        login_host: "{{ db_host }}"
+      when: db_host != "localhost"
 
-    - name: Create the MySQL user
+    - name: Create the MySQL database on localhost
+      mysql_db:
+        name: "{{ db_name }}"
+        state: present
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+      when: db_host == "localhost"
+
+    - name: Create the MySQL user on remote server
       mysql_user:
         name: "{{ db_name }}"
         password: "{{ db_passwd }}"
@@ -27,6 +37,19 @@
         state: present
         login_user: "{{ hostvars[db_host]['db']['db_user'] }}"
         login_password: "{{ hostvars[db_host]['db']['db_passwd'] }}"
+        login_host: "{{ db_host }}"
+      when: db_host != "localhost"
+
+    - name: Create the MySQL user on localhost
+      mysql_user:
+        name: "{{ db_name }}"
+        password: "{{ db_passwd }}"
+        priv:
+          '{{ db_name }}.*:ALL'
+        column_case_sensitive: true
+        state: present
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+      when: db_host == "localhost"
 
     - name: Run CMS-specific tasks
       include_tasks: "install/{{ software }}.yml"

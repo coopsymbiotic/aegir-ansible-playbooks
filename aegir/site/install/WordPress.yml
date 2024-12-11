@@ -2,7 +2,7 @@
 
 - name: Create the wp-config.php file for the site
   template:
-    src: "WordPress/wp-config.php"
+    src: "WordPress/wp-config.php.j2"
     dest: "{{ site_path }}/wp-config.php"
     owner: aegir
     group: www-data
@@ -13,5 +13,5 @@
   become_user: aegir
   shell:
     chdir: "{{ site_path }}"
-    cmd: "wp core install --url={{ inventory_hostname }} --title={{ inventory_hostname }} --admin_user=symbiotic --admin_email=fixme@example.org --admin_password=changeme"
+    cmd: "wp core install --url={{ inventory_hostname }} --title={{ inventory_hostname }} --admin_user=symbiotic --admin_email=fixme@example.org --admin_password=changeme --skip-email"
     creates: "{{ site_path }}/wp-content"
