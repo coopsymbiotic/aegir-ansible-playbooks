@@ -74,12 +74,24 @@ if (!defined('CIVICRM_UF_DSN') && CIVICRM_UF !== 'UnitTests') {
 }
 
 // Additional settings
+{% if software == 'Drupal10' %}
 $civicrm_paths['civicrm.files']['url'] = 'https://{{ inventory_hostname }}/sites/{{ inventory_hostname }}/files/civicrm';
 $civicrm_paths['civicrm.files']['path'] = '{{ site_path }}/files/civicrm';
 $civicrm_paths['civicrm.private']['path'] = '{{ site_path }}/private/files/civicrm';
+{% elif software == 'Drupal7' || software == 'Backdrop' %}
+$civicrm_paths['civicrm.files']['url'] = 'https://{{ inventory_hostname }}/sites/{{ inventory_hostname }}/files/civicrm';
+$civicrm_paths['civicrm.files']['path'] = '{{ site_path }}/files/civicrm';
+$civicrm_paths['civicrm.private']['path'] = '{{ site_path }}/files/civicrm';
+{% elif software == 'WordPress' %}
+$civicrm_paths['civicrm.private']['path'] = '{{ site_path }}/wp-content/uploads/civicrm';
+$civicrm_paths['wp.frontend.base']['url'] = 'https://{{ inventory_hostname }}/';
+$civicrm_paths['wp.backend.base']['url'] = 'https://{{ inventory_hostname }}/wp-admin/';
+$civicrm_setting['domain']['userFrameworkResourceURL'] = 'https://{{ inventory_hostname }}/sites/{{ inventory_hostname }}/wp-content/plugins/civicrm/civicrm';
+{% endif %}
 
 // Force Clean URLs to prevent bad Civi multilingual urls
 define('CIVICRM_CLEANURL', 1);
+
 // Include the global.inc so that cv always reads it 
 @include_once('/var/aegir/config/includes/global.inc');
 
@@ -153,44 +165,9 @@ if (!defined('CIVICRM_LOGGING_DSN')) {
  *
  * IMPORTANT: The COMPILEDIR directory must exist,
  * and your web server must have read/write access to these directories.
- *
- *
- * EXAMPLE - Drupal:
- * If the path to the Drupal home directory is /var/www/htdocs/drupal
- * the $civicrm_root setting would be:
- *      $civicrm_root = '/var/www/htdocs/drupal/sites/all/modules/civicrm/';
- *
- * the CIVICRM_TEMPLATE_COMPILEDIR would be:
- *      define( 'CIVICRM_TEMPLATE_COMPILEDIR', '/var/www/htdocs/drupal/sites/default/files/civicrm/templates_c/');
- *
- * EXAMPLE - Backdrop CMS:
- * If the path to the Backdrop home directory is /var/www/htdocs/backdrop
- * the $civicrm_root setting would be:
- *      $civicrm_root = '/var/www/htdocs/backdrop/modules/civicrm/';
- *
- * the CIVICRM_TEMPLATE_COMPILEDIR would be:
- *      define( 'CIVICRM_TEMPLATE_COMPILEDIR', '/var/www/htdocs/backdrop/files/civicrm/templates_c/');
- *
- * EXAMPLE - Joomla Installations:
- * If the path to the Joomla home directory is /var/www/htdocs/joomla
- * the $civicrm_root setting would be:
- *      $civicrm_root = '/var/www/htdocs/joomla/administrator/components/com_civicrm/civicrm/';
- *
- * the CIVICRM_TEMPLATE_COMPILEDIR would be:
- *      define( 'CIVICRM_TEMPLATE_COMPILEDIR', '/var/www/htdocs/joomla/media/civicrm/templates_c/');
- *
- * EXAMPLE - WordPress Installations:
- * If the path to the WordPress home directory is /var/www/htdocs/wordpress and the path to the plugin directory is /var/www/htdocs/wordpress/wp-content/plugins
- * the $civicrm_root setting would be:
- *      $civicrm_root = '/var/www/htdocs/wordpress/wp-content/plugins/civicrm/civicrm/';
- *
- * the CIVICRM_TEMPLATE_COMPILEDIR would be:
- *      define( 'CIVICRM_TEMPLATE_COMPILEDIR', '/var/www/htdocs/wordpress/wp-content/uploads/civicrm/templates_c/');
- *
  */
-
 {% if software == 'Drupal10' %}
-$civicrm_root = '{{ site_root }}/../vendor/civicrm/civicrm-core/';
+$civicrm_root = '{{ site_root + "/../vendor/civicrm/civicrm-core/" | realpath }}';
 {% elif software == 'Drupal7' %}
 $civicrm_root = '{{ site_root }}/sites/all/modules/civicrm/';
 {% elif software == 'Backdrop' %}
