@@ -424,8 +424,8 @@ if (!defined('CIVICRM_DOMAIN_ID')) {
  * NB: defining a value for environment here prevents it from being set
  * via the browser.
  */
-{% if environment is defined %}
-$civicrm_setting['domain']['environment'] = '{{ environment }}';
+{% if site_environment is defined %}
+$civicrm_setting['domain']['environment'] = '{{ site_environment }}';
 {% else %}
 // $civicrm_setting['domain']['environment'] = 'Production';
 {% endif %}
