@@ -2,6 +2,11 @@
 
 - hosts: all
   tasks:
+    - name: Register a new site in the Aegir inventory
+      shell:
+        chdir: "/var/aegir/admin/web"
+        cmd: "/usr/local/bin/bee hosting-site-clone {{ inventory_hostname }} {{ new_uri }} {{ target_platform }} {{ new_db_server }}"
+
     - name: Change the site directory permissions temporarily
       file:
         path: "{{ site_path }}"
@@ -10,11 +15,8 @@
 
     - include_tasks: "backup/sql.yml"
 
-    # Create new database
-
-    # Import SQL
-
-    # TODO rsync files...
+    # TODO rsync files
+    # Import SQL (in install.yml?)
 
     - name: Delete the local SQL dump
       file:

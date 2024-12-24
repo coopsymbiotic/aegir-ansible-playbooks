@@ -51,6 +51,7 @@
         login_unix_socket: /var/run/mysqld/mysqld.sock
       when: db_host == "localhost"
 
+    # TODO: check for a database.sql file and import it? (for node-clone)
     - name: Run CMS-specific tasks
       include_tasks: "install/{{ software }}.yml"
 
