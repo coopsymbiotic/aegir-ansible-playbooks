@@ -1,0 +1,28 @@
+---
+
+- hosts: all
+  tasks:
+    - name: Change the site directory permissions temporarily
+      file:
+        path: "{{ site_path }}"
+        state: directory
+        mode: 0750
+
+    - include_tasks: "backup/sql.yml"
+
+    # Create new database
+
+    # Import SQL
+
+    # TODO rsync files...
+
+    - name: Delete the local SQL dump
+      file:
+        path: "{{ site_path }}/database.sql"
+        state: absent
+
+    - name: Change the site directory permissions back to normal
+      file:
+        path: "{{ site_path }}"
+        state: directory
+        mode: 0550
