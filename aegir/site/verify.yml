@@ -51,6 +51,16 @@
       notify:
         - reload nginx
 
+    - name: Create a drush site alias file for legacy scripts such as monitoring
+      template:
+        src: "site.alias.drushrc.php"
+        dest: "/var/aegir/.drush/{{ inventory_hostname }}.alias.drushrc.php"
+        owner: aegir
+        group: aegir
+        mode: 0644
+      notify:
+        - reload nginx
+
     - name: Run CMS-specific tasks
       include_tasks: "verify/{{ software }}.yml"
 
