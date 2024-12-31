@@ -9,6 +9,15 @@
   become_user: aegir
   when: software == "Drupal10"
 
+- name: Drupal7 | Generate a database dump
+  shell:
+    chdir: "{{ site_path }}"
+    cmd: "drush sql-dump --result-file={{ site_path }}/database.sql"
+    creates: "{{ site_path }}/database.sql"
+  become: true
+  become_user: aegir
+  when: software == "Drupal7"
+
 - name: Backdrop | Generate a database dump
   shell:
     chdir: "{{ site_path }}"
