@@ -51,11 +51,26 @@
         login_unix_socket: /var/run/mysqld/mysqld.sock
       when: db_host == "localhost"
 
-    # TODO: check for a database.sql file and import it? (for node-clone)
-    - name: Run CMS-specific tasks
+    - name: Test if a database.sql file already exists (clone or remote-import)
+      stat:
+        path: "{{ site_path }}/database.sql"
+      register: sqldump
+
+    - name: Update CMS-specific settings
+      include_tasks: "verify/{{ software }}/settings.yml"
+      when: sqldump.stat.exists
+
+    - name: Import the SQL dump
+      include_tasks: "restore/sql.yml"
+      when: sqldump.stat.exists
+
+    - name: Run CMS-specific installation tasks
       include_tasks: "install/{{ software }}.yml"
+      when: not sqldump.stat.exists
 
     - name: Run provision-enable
       shell:
         chdir: "/var/aegir/admin/web"
         cmd: "/usr/local/bin/bee hosting-site-task {{ inventory_hostname }} enable"
+      # @todo 'bee' does not return errors, validate output
+      # failed_when: "'^\\d+' not in result.stdout"

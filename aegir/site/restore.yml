@@ -29,39 +29,20 @@
     - name: Run CMS-specific verify tasks
       include_tasks: "verify/{{ software }}.yml"
 
-    - name: Drupal10 | Import the SQL dump
-      shell:
-        chdir: "{{ site_path }}"
-        cmd: "cat database.sql | drush -l {{ inventory_hostname }} sqlc"
-      become: true
-      become_user: aegir
-      when: software == "Drupal10"
-
-    - name: Drupal7 | Import the SQL dump
-      shell:
-        chdir: "{{ site_path }}"
-        cmd: "cat database.sql | drush sqlc"
-      become: true
-      become_user: aegir
-      when: software == "Drupal7"
-
-    - name: WordPress | Import the SQL dump
-      shell:
-        chdir: "{{ site_path }}"
-        cmd: "cat database.sql | wp sql cli"
-      become: true
-      become_user: aegir
-      when: software == "WordPress"
-
-    - name: Backdrop | Import the SQL dump
-      shell:
-        chdir: "{{ site_path }}"
-        cmd: "cat database.sql | bee sql cli"
-      become: true
-      become_user: aegir
-      when: software == "Backdrop"
+    - name: Import the SQL dump
+      include_tasks: "restore/sql.yml"
 
     - name: Delete the SQL dump
       file:
         path: "{{ site_path }}/database.sql"
         state: absent
+
+  handlers:
+  - name: reload nginx
+    service:
+      name: nginx
+      state: reloaded
+
+  - name: reload systemd
+    systemd:
+      daemon_reload: yes

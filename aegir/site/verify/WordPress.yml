@@ -1,28 +1,13 @@
 ---
 
+- include_tasks: WordPress/settings.yml
+
 - name: WordPress | Run fix permissions
   shell:
     chdir: "{{ site_path }}"
     cmd: "/usr/local/aegir-ansible-playbooks/bin/fix-wordpress-permissions.sh --force=1 --site-path='{{ site_path }}'"
   tags:
     - wordpress-fixpermissions
-
-- name: WordPress | Update the site wp-config.php file
-  template:
-    src: "WordPress/wp-config.php.j2"
-    dest: "{{ site_path }}/wp-config.php"
-    owner: aegir
-    group: www-data
-    mode: 0440
-
-- name: WordPress | Update the site civicrm.settings.php file
-  template:
-    src: "CiviCRM/civicrm.settings.php.j2"
-    dest: "{{ site_path }}/wp-content/uploads/civicrm/civicrm.settings.php"
-    owner: aegir
-    group: www-data
-    mode: 0440
-  when: civicrm_site_key is defined
 
 # Make sure we have correct symlinks for the global plugins
 - include_tasks: WordPress/symlinks.yml

@@ -1,0 +1,19 @@
+---
+
+- name: WordPress | Update the site wp-config.php file
+  template:
+    src: "WordPress/wp-config.php.j2"
+    dest: "{{ site_path }}/wp-config.php"
+    owner: aegir
+    group: www-data
+    mode: 0440
+
+- name: WordPress | Update the site civicrm.settings.php file
+  template:
+    src: "CiviCRM/civicrm.settings.php.j2"
+    dest: "{{ site_path }}/wp-content/uploads/civicrm/civicrm.settings.php"
+    owner: aegir
+    group: www-data
+    mode: 0440
+  when: civicrm_site_key is defined
+

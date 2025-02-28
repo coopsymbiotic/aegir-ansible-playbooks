@@ -2,12 +2,7 @@
 
 - hosts: all
   tasks:
-    - name: Register a new site in the Aegir inventory
-      shell:
-        chdir: "/var/aegir/admin/web"
-        cmd: "/usr/local/bin/bee hosting-site-clone {{ inventory_hostname }} {{ new_uri }} {{ target_platform }} {{ new_db_server }}"
-
-    - name: Change the site directory permissions temporarily
+    - name: Change the source site directory permissions temporarily
       file:
         path: "{{ site_path }}"
         state: directory
@@ -15,16 +10,34 @@
 
     - include_tasks: "backup/sql.yml"
 
-    # TODO rsync files
-    # Import SQL (in install.yml?)
+    - name: rsync the site to the new location
+      ansible.posix.synchronize:
+        src: "{{ site_path }}/"
+        dest: "{{ new_site_root }}/sites/{{ new_uri }}"
+        archive: true
 
     - name: Delete the local SQL dump
       file:
         path: "{{ site_path }}/database.sql"
         state: absent
 
-    - name: Change the site directory permissions back to normal
+    - name: Change the source site directory permissions back to normal
       file:
         path: "{{ site_path }}"
         state: directory
         mode: 0550
+
+    - name: Register a new site in the Aegir inventory
+      shell:
+        chdir: "/var/aegir/admin/web"
+        cmd: "/usr/local/bin/bee hosting-site-clone {{ nid }} {{ new_uri }} {{ new_site_root }} {{ new_db_server }}"
+      register: result
+      # @todo 'bee' does not return errors, validate output
+      # failed_when: "'^\\d+' not in result.stdout"
+
+    - name: Run provision-install on the new site
+      shell:
+        chdir: "/var/aegir/admin/web"
+        cmd: "/usr/local/bin/bee hosting-site-task {{ new_uri }} install"
+      # @todo 'bee' does not return errors, validate output
+      # failed_when: "'^\\d+' not in result.stdout"

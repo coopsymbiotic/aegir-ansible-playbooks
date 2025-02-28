@@ -17,6 +17,8 @@
         path: "/var/aegir/config/letsencrypt.d/{{ inventory_hostname }}"
         state: absent
 
+    # todo: delete the database and user
+
     - name: Update the site status to Deleted
       shell:
         chdir: "/var/aegir/admin/web"

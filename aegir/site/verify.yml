@@ -64,6 +64,15 @@
     - name: Run CMS-specific tasks
       include_tasks: "verify/{{ software }}.yml"
 
+    - name: Update the site verified status
+      shell:
+        chdir: "/var/aegir/admin/web"
+        cmd: "/usr/local/bin/bee hosting-site-update-status --verified=1 {{ nid }}"
+      register: result
+      failed_when: "result.stdout != ''"
+      become: true
+      become_user: aegir
+
   handlers:
   - name: reload nginx
     service:
