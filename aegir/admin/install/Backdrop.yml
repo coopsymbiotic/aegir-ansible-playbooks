@@ -48,8 +48,8 @@
     group: "{{ aegir_web_group }}"
 
 - name: Set the site frontpage to hosting/sites
-   become: true
-   become_user: aegir
-   shell:
-     chdir: "{{ aegir_home }}/admin/web"
-     cmd: "bee config-set system.core site_frontpage hosting/sites"
+  become: true
+  become_user: aegir
+  shell:
+    chdir: "{{ aegir_home }}/admin/web"
+    cmd: "bee config-set system.core site_frontpage hosting/sites"
