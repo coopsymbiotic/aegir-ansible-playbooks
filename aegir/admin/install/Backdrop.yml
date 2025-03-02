@@ -4,13 +4,22 @@
   shell: hostname -f
   register: hostname
 
+- name: "Check if Backdrop has been installed already"
+  lineinfile:
+    name: /var/aegir/admin/web/settings.php
+    line: "database_name"
+    state: present
+  check_mode: yes
+  register: settings
+
 - name: Install Backdrop
   become: true
   become_user: aegir
   shell:
     chdir: "{{ aegir_home }}/admin/web"
-    cmd: "bee -y site-install --db-name={{ aegir_db_name }} --db-user={{ aegir_db_name }} --db-pass={{ aegirpass.stdout }} --db-host={{ aegir_db_host }} --site-name={{ hostname.stdout }} --sites-subdir={{ hostname.stdout }} --site-mail={{ aegir_admin_email }} --locale=en --auto"
-    creates: "{{ aegir_home }}/admin/web/settings.php"
+    # bee does not work well for the site install, obscure errors
+    cmd: "php ./core/scripts/install.sh --db-url='mysql://{{ aegir_db_name }}:{{ aegirpass.stdout }}@{{ aegir_db_host }}/{{ aegir_db_name }}' --account-name='admin' --account-mail='{{ aegir_admin_email }}' --site-name='{{ hostname.stdout }}'"
+  when: settings.changed
 
 # FIXME: this is a workaround because our common vhost stuff aliases /files to /sites/xx/files
 # but maybe we should not use that common vhost
@@ -37,3 +46,10 @@
     mode: 0775
     owner: "{{ aegir_user }}"
     group: "{{ aegir_web_group }}"
+
+- name: Set the site frontpage to hosting/sites
+   become: true
+   become_user: aegir
+   shell:
+     chdir: "{{ aegir_home }}/admin/web"
+     cmd: "bee config-set system.core site_frontpage hosting/sites"
