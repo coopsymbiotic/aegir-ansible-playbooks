@@ -7,7 +7,7 @@
 # Duplicates a lot from aegir/site/verify.yml
 - name: Check if the http cert already exists
   stat:
-    path: "/var/aegir/config/letsencrypt.d/{{ hostname.stdout }}/fullchain.pem"
+    path: "/var/lib/dehydrated/certs/{{ hostname.stdout }}/fullchain.pem"
   register: cert
 
 - name: Check if the dhparams file exists
@@ -28,7 +28,7 @@
 - name: Generate an https certificate
   shell:
     chdir: "/var/aegir"
-    cmd: "dehydrated --accept-terms -c -d {{ hostname.stdout }} -f /var/aegir/config/letsencrypt/config"
+    cmd: "dehydrated --accept-terms -c -d {{ hostname.stdout }}"
   register: certlog
 
 # Always display the output, often requires debugging
