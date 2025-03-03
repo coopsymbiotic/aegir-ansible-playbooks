@@ -5,11 +5,9 @@
   register: hostname
 
 - name: "Check if Backdrop has been installed already"
-  lineinfile:
-    name: /var/aegir/admin/web/settings.php
-    line: "database_name"
-    state: present
-  check_mode: yes
+  shell:
+    cmd: grep -q database_name /var/aegir/admin/web/settings.php
+  ignore_errors: yes
   register: settings
 
 - name: Install Backdrop
@@ -19,7 +17,7 @@
     chdir: "{{ aegir_home }}/admin/web"
     # bee does not work well for the site install, obscure errors
     cmd: "php ./core/scripts/install.sh --db-url='mysql://{{ aegir_db_name }}:{{ aegirpass.stdout }}@{{ aegir_db_host }}/{{ aegir_db_name }}' --account-name='admin' --account-mail='{{ aegir_admin_email }}' --site-name='{{ hostname.stdout }}'"
-  when: settings.changed
+  when: settings.rc == 0
 
 # FIXME: this is a workaround because our common vhost stuff aliases /files to /sites/xx/files
 # but maybe we should not use that common vhost
@@ -41,7 +39,7 @@
 
 - name: Fix the files directory permissions
   file:
-    path: "{{ aegir_home }}/admin/files"
+    path: "{{ aegir_home }}/admin/web/files"
     state: directory
     mode: 0775
     owner: "{{ aegir_user }}"

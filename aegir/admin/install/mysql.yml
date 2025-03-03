@@ -4,12 +4,19 @@
   shell: pwgen 15 1
   register: aegirpass
 
+- name: "Check if Backdrop has been installed already"
+  shell:
+    cmd: grep -q database_name /var/aegir/admin/web/settings.php
+  ignore_errors: yes
+  register: settings
+
 # @todo Add conditions for a remote SQL with login/pass
 - name: Create the MySQL database
   mysql_db:
     login_unix_socket: /var/run/mysqld/mysqld.sock
     name: "{{ aegir_db_name }}"
     state: present
+  when: settings.rc == 0
 
 - name: Create the MySQL user
   mysql_user:
@@ -20,3 +27,4 @@
       '{{ aegir_db_name }}.*:ALL'
     column_case_sensitive: true
     state: present
+  when: settings.rc == 0
