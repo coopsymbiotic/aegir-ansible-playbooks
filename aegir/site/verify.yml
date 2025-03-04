@@ -53,7 +53,7 @@
 
     - name: Create a drush site alias file for legacy scripts such as monitoring
       template:
-        src: "site.alias.drushrc.php"
+        src: "site.alias.drushrc.php.j2"
         dest: "/var/aegir/.drush/{{ inventory_hostname }}.alias.drushrc.php"
         owner: aegir
         group: aegir
