@@ -1,5 +1,6 @@
 <?php
 // {{ ansible_managed }}
+{# drushrc alias file, ex: /var/aegir/.drush/example.org.alias.drushrc.php #}
 $aliases['{{ inventory_hostname }}'] = [
   'context_type' => 'site',
   'uri' => '{{ inventory_hostname }}',

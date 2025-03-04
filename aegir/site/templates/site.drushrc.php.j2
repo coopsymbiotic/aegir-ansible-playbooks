@@ -1,0 +1,22 @@
+<?php 
+
+// {{ ansible_managed }}
+{# drushrc site file, ex: /var/aegir/platforms/drupal10/web/sites/example.org/drushrc.php #}
+{# Required for Drupal7, but not required by Drupal10 #}
+$options['db_type'] = 'mysql';
+$options['db_host'] = '{{ db_host }}';
+$options['db_port'] = '{{ db_port }}';
+$options['db_passwd'] = '{{ db_passwd }}';
+$options['db_name'] = '{{ db_name }}';
+$options['db_user'] = '{{ db_name }}';
+$options['installed'] = true;
+# Aegir additions.
+$_SERVER['db_type'] = $options['db_type'];
+$_SERVER['db_port'] = $options['db_port'];
+$_SERVER['db_host'] = $options['db_host'];
+$_SERVER['db_user'] = $options['db_user'];
+$_SERVER['db_passwd'] = $options['db_passwd'];
+$_SERVER['db_name'] = $options['db_name'];
+          
+# Local non-aegir-generated additions.
+@include_once('{{ site_path }}/local.drushrc.php');

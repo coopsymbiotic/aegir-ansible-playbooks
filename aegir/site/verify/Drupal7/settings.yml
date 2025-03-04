@@ -1,9 +1,17 @@
 ---
 
-- name: Create the settings.php file for the site
+- name: Update the settings.php file for the site
   template:
     src: "Drupal7/settings.php.j2"
     dest: "{{ site_path }}/settings.php"
+    owner: aegir
+    group: www-data
+    mode: 0440
+
+- name: Update the drushrc.php file for the site
+  template:
+    src: "site.drushrc.php.j2"
+    dest: "{{ site_path }}/drushrc.php"
     owner: aegir
     group: www-data
     mode: 0440
