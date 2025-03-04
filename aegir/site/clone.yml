@@ -30,14 +30,22 @@
     - name: Register a new site in the Aegir inventory
       shell:
         chdir: "/var/aegir/admin/web"
-        cmd: "/usr/local/bin/bee hosting-site-clone {{ nid }} {{ new_uri }} {{ new_site_root }} {{ new_db_server }}"
+        cmd: "/usr/local/bin/bee hosting-site-clone {{ nid }} {{ new_uri }} {{ target_platform }} {{ new_db_server }}"
       register: result
-      # @todo 'bee' does not return errors, validate output
-      # failed_when: "'^\\d+' not in result.stdout"
+      failed_when: "'^\\d+' not in result.stdout"
 
-    - name: Run provision-install on the new site
-      shell:
-        chdir: "/var/aegir/admin/web"
-        cmd: "/usr/local/bin/bee hosting-site-task {{ new_uri }} install"
-      # @todo 'bee' does not return errors, validate output
-      # failed_when: "'^\\d+' not in result.stdout"
+    - name: Create the new MySQL database and user
+      include_tasks: "install/mysql.yml"
+
+    - name: Test if a database.sql file already exists (clone or remote-import)
+      stat:
+        path: "{{ site_path }}/database.sql"
+      register: sqldump
+
+    - name: Update CMS-specific settings
+      include_tasks: "verify/{{ software }}/settings.yml"
+      when: sqldump.stat.exists
+
+    - name: Import the SQL dump
+      include_tasks: "restore/sql.yml"
+      when: sqldump.stat.exists
