@@ -30,7 +30,7 @@
     - name: Generate an https certificate
       shell:
         chdir: "/var/aegir"
-        cmd: "dehydrated --accept-terms -c -d {{ inventory_hostname }} -f /var/aegir/config/letsencrypt/config"
+        cmd: "dehydrated --accept-terms -c -d {{ inventory_hostname }}"
       register: certlog
 
     # Always display the output, often requires debugging

@@ -6,35 +6,6 @@
       debug:
         msg: "Not implemented yet."
 
-    - name: Ensure the letsencrypt config directory exists
-      file:
-        path: "/var/aegir/config/letsencrypt/"
-        state: directory
-        owner: aegir
-        group: aegir
-
-    - name: Create the letsencrypt certificate directory
-      file:
-        path: "/var/aegir/config/letsencrypt.d/"
-        state: directory
-        owner: aegir
-        group: aegir
-
-    - name: Create the letsencrypt well-known directory
-      file:
-        path: "/var/aegir/config/letsencrypt.d/well-known/acme-challenge"
-        state: directory
-        owner: aegir
-        group: aegir
-
-    - name: Create the letsencrypt dehydrated configuration
-      template:
-        src: "dehydrated-config"
-        dest: "/var/aegir/config/letsencrypt/config"
-        owner: aegir
-        group: aegir
-        mode: 0644
-
 # Ex:
 # - validate MySQL credentials
 # - update nginx configuration
