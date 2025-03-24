@@ -17,6 +17,11 @@
         path: "/var/aegir/config/letsencrypt.d/{{ inventory_hostname }}"
         state: absent
 
+    - name: Delete the drush site alias file
+      file:
+        path: "/var/aegir/.drush/{{ inventory_hostname }}.alias.drushrc.php"
+        state: absent
+
     # todo: delete the database and user
 
     - name: Update the site status to Deleted

@@ -52,8 +52,6 @@
         owner: aegir
         group: aegir
         mode: 0644
-      notify:
-        - reload nginx
 
     - name: Run CMS-specific tasks
       include_tasks: "verify/{{ software }}.yml"
