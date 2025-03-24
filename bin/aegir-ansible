@@ -11,7 +11,7 @@ host=$1
 tag=$2
 
 # Validate that the hostname looks like a FQDN
-echo $host | grep -q -E "^[-\.a-zA-Z0-9]+$"
+echo $host | grep -q -E "^[-_\.a-zA-Z0-9]+$"
 
 if [ $? != 0 ]; then
   echo "Error: Invalid host format"
