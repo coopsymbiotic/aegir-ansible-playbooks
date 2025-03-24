@@ -27,14 +27,8 @@
     - name: Force the nginx reload to happen now so that the well-known route works
       meta: flush_handlers
 
-    - name: Generate an https certificate
-      shell:
-        chdir: "/var/aegir"
-        cmd: "dehydrated --accept-terms -c -d {{ inventory_hostname }}"
-      register: certlog
-
-    # Always display the output, often requires debugging
-    - debug: var=certlog.stdout_lines
+    - name: Run dehydrated
+      include_tasks: "verify/dehydrated.yml"
 
     - name: Check again if the http cert exists
       stat:

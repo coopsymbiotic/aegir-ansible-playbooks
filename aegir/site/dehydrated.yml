@@ -1,0 +1,9 @@
+---
+
+# Helper to run daily https renewals with dehydrated (letsencrypt)
+# Ex: sudo aegir-ansible example.org.org site/dehydrated.yml
+
+- hosts: all
+  tasks:
+    - name: Run dehydrated
+      include_tasks: "verify/dehydrated.yml"

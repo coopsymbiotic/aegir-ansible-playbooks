@@ -1,0 +1,18 @@
+---
+
+- name: dehydrated | Update the domains.txt
+  template:
+    src: "domains.txt.j2"
+    dest: "/etc/dehydrated/domains.txt"
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Generate an https certificate
+  shell:
+    chdir: "/var/aegir"
+    cmd: "dehydrated --accept-terms --cron --keep-going"
+  register: certlog
+
+# Always display the output, often requires debugging
+- debug: var=certlog.stdout_lines
