@@ -8,6 +8,11 @@
     group: www-data
     mode: 0440
 
+- name: Test if CiviCRM seems to exist
+  stat:
+    path: "{{ site_path }}/wp-content/uploads/civicrm"
+  register: cividir
+
 - name: WordPress | Update the site civicrm.settings.php file
   template:
     src: "CiviCRM/civicrm.settings.php.j2"
@@ -15,5 +20,5 @@
     owner: aegir
     group: www-data
     mode: 0440
-  when: civicrm_site_key is defined
+  when: civicrm_site_key is defined and cividir.stat.exists
 
