@@ -355,8 +355,7 @@ if (!defined('CIVICRM_SITE_KEY')) {
  * More info at https://docs.civicrm.org/sysadmin/en/latest/setup/cred-key/
  */
 if (!defined('CIVICRM_CRED_KEYS') ) {
-  // @todo We should store this key because rotating it will cause problems
-  define('CIVICRM_CRED_KEYS', 'aes-cbc:hkdf-sha256:{{ (inventory_hostname + aegir_salt) | hash('sha256') }}');
+  define('CIVICRM_CRED_KEYS', '{{ civicrm_cred_key }}');
 }
 
 if (!defined('CIVICRM_DEPLOY_ID') ) {
@@ -381,8 +380,7 @@ if (!defined('CIVICRM_DEPLOY_ID') ) {
  * If key-encoding is blank, it will default to "hkdf-sha256".
  */
 if (!defined('CIVICRM_SIGN_KEYS') ) {
-  // @todo We should store this key because rotating it will cause problems
-  define('CIVICRM_SIGN_KEYS', 'jwt-hs256:hkdf-sha256:{{ (inventory_hostname + aegir_salt) | hash('sha256') }}');
+  define('CIVICRM_SIGN_KEYS', '{{ civicrm_sign_key }}');
 }
 
 /**
