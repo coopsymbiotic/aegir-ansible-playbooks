@@ -27,7 +27,7 @@
 - name: platform | Run composer install to download Aegir hosting modules
   shell:
     chdir: "{{ aegir_home }}/admin/"
-    cmd: "composer install"
+    cmd: "composer install --prefer-source"
     creates: "{{ aegir_home }}/admin/modules/hosting"
   become: true
   become_user: "{{ aegir_user }}"
