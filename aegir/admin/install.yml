@@ -26,6 +26,9 @@
 
     - name: Create a mysql user
       include_tasks: "install/mysql.yml"
+      tags:
+        - admin-install-mysql
+        - admin-install-new
 
     - name: Install BackdropCMS
       include_tasks: "install/Backdrop.yml"
