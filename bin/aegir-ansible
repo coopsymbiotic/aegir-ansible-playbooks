@@ -26,16 +26,6 @@ export AEGIR_INVENTORY_LOCAL=1
 
 # Validate that the tag looks valid
 if [ -n "$tag" ]; then
-  # If necessary, make sure the inventory lists deleted sites so that we can remove their crons
-  # also applies to verify because the site might not yet be enabled (import/migrate)
-  # @todo Feels like include_disabled is always required
-  query_args=""
-  if [ "$tag" == "site/install.yml" ] || [ "$tag" == "site/delete.yml" ] || [ "$tag" == "site/enable.yml" ] || [ "$tag" == "site/verify.yml" ]; then
-    query_args="?include_disabled=1"
-  fi
-
-  export AEGIR_INVENTORY_ARGS=$query_args
-
   # Limit to 2 tasks in parallel because running many DB upgrades can overload the system
   # We pass all extra args "${*:3}" because they are extra inventory vars formatted as key=val
   ansible-playbook -v -f 2 --connection=local -i /usr/local/aegir-ansible-playbooks/bin/aegir-inventory --extra-vars "${*:3}" -l $host /usr/local/aegir-ansible-playbooks/aegir/$tag
