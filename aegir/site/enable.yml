@@ -11,7 +11,7 @@
     - name: Flush the cache
       shell:
         chdir: "/var/aegir/admin/web"
-        cmd: "/usr/local/bin/bee cc core"
+        cmd: "/usr/local/bin/bee cc all"
 
     - name: Run provision-verify
       shell:
