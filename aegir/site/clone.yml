@@ -27,25 +27,12 @@
         state: directory
         mode: 0550
 
+    # Has to be done before creating the MySQL user, so that we can store the new MySQL credentials
+    # This will set an "import" flag, which will then run the Import task (which will import the database.sql)
     - name: Register a new site in the Aegir inventory
       shell:
         chdir: "/var/aegir/admin/web"
         cmd: "/usr/local/bin/bee hosting-site-clone {{ nid }} {{ new_uri }} {{ target_platform }} {{ new_db_server }}"
       register: result
-      failed_when: "'^\\d+' not in result.stdout"
-
-    - name: Create the new MySQL database and user
-      include_tasks: "install/mysql.yml"
-
-    - name: Test if a database.sql file already exists (clone or remote-import)
-      stat:
-        path: "{{ site_path }}/database.sql"
-      register: sqldump
-
-    - name: Update CMS-specific settings
-      include_tasks: "verify/{{ software }}/settings.yml"
-      when: sqldump.stat.exists
-
-    - name: Import the SQL dump
-      include_tasks: "restore/sql.yml"
-      when: sqldump.stat.exists
+      # This is not working correctly
+      # failed_when: "'^\\d+' not in result.stdout"
