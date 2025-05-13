@@ -24,6 +24,9 @@
 
     # todo: delete the database and user
 
+    - name: Run CMS-specific tasks
+      include_tasks: "delete/{{ software }}.yml"
+
     - name: Update the site status to Deleted
       shell:
         chdir: "/var/aegir/admin/web"
