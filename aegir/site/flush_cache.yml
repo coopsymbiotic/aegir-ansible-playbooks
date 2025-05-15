@@ -1,0 +1,6 @@
+---
+
+- hosts: all
+  tasks:
+    - name: Run CMS-specific tasks
+      include_tasks: "flush_cache/{{ software }}.yml"
