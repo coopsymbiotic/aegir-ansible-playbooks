@@ -1,0 +1,33 @@
+---
+
+- name: Delete the MySQL database on remote server
+  mysql_db:
+    name: "{{ db_name }}"
+    state: absent
+    login_user: "{{ hostvars[db_host]['db']['db_user'] }}"
+    login_password: "{{ hostvars[db_host]['db']['db_passwd'] }}"
+    login_host: "{{ db_host }}"
+  when: db_host != "localhost"
+
+- name: Delete the MySQL database on localhost
+  mysql_db:
+    name: "{{ db_name }}"
+    state: absent
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+  when: db_host == "localhost"
+
+- name: Delete the MySQL user on remote server
+  mysql_user:
+    name: "{{ db_name }}"
+    state: absent
+    login_user: "{{ hostvars[db_host]['db']['db_user'] }}"
+    login_password: "{{ hostvars[db_host]['db']['db_passwd'] }}"
+    login_host: "{{ db_host }}"
+  when: db_host != "localhost"
+
+- name: Delete the MySQL user on localhost
+  mysql_user:
+    name: "{{ db_name }}"
+    state: absent
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+  when: db_host == "localhost"

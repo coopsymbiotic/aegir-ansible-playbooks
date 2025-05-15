@@ -22,7 +22,8 @@
         path: "/var/aegir/.drush/{{ inventory_hostname }}.alias.drushrc.php"
         state: absent
 
-    # todo: delete the database and user
+    - name: Delete the new MySQL database and user
+      include_tasks: "delete/mysql.yml"
 
     - name: Run CMS-specific tasks
       include_tasks: "delete/{{ software }}.yml"
