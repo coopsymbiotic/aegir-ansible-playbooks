@@ -31,3 +31,9 @@
   become: true
   become_user: aegir
   when: software == "Backdrop"
+
+- name: CiviCRM | Import the database dump
+  shell:
+    chdir: "{{ site_path }}"
+    cmd: "mysql {{ db_name }} < {{ site_path }}/database.sql"
+  when: software == "CiviCRM"

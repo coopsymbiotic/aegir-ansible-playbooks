@@ -36,6 +36,13 @@
   become_user: aegir
   when: software == "WordPress"
 
+- name: CiviCRM | Generate a database dump
+  shell:
+    chdir: "{{ site_path }}"
+    cmd: "mysqldump {{ db_name }} > {{ site_path }}/database.sql"
+    creates: "{{ site_path }}/database.sql"
+  when: software == "CiviCRM"
+
 - name: Remove DEFINERs for views and procedures
   shell:
     chdir: "{{ site_path }}"

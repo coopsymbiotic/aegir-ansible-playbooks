@@ -17,3 +17,15 @@
      - name: Import the SQL dump
        include_tasks: "restore/sql.yml"
        when: sqldump.stat.exists
+
+     - name: SQL dump missing
+       debug:
+         msg: "Warning: The SQL dump is missing, not imported"
+       when: not sqldump.stat.exists
+
+     - name: Run provision-enable
+       shell:
+         chdir: "/var/aegir/admin/web"
+         cmd: "/usr/local/bin/bee hosting-site-task {{ inventory_hostname }} enable"
+       # @todo 'bee' does not return errors, validate output
+       # failed_when: "'^\\d+' not in result.stdout"

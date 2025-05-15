@@ -10,11 +10,13 @@
 
     - include_tasks: "backup/sql.yml"
 
+    # Using no_log here to reduce the warnings in the Ansible logs
     - name: rsync the site to the new location
       ansible.posix.synchronize:
         src: "{{ site_path }}/"
         dest: "{{ new_site_root }}/sites/{{ new_uri }}"
         archive: true
+      no_log: true
 
     - name: Delete the local SQL dump
       file:
