@@ -20,6 +20,17 @@
     cmd: "env CIVICRM_SETTINGS='{{ site_root }}/../private/{{ inventory_hostname }}/civicrm.settings.php' cv -n core:install --settings-path='{{ site_root }}/../private/{{ inventory_hostname }}/civicrm.settings.php' --db=mysql://{{ db_name }}:{{ db_passwd }}@{{ db_host }}:{{ db_port }}/{{ db_name }} --url=https://{{ inventory_hostname }} -m extras.adminUser=admin -m extras.adminPass=CHANGEME -m extras.adminEmail=fixme@example.org -m templateCompilePath={{ site_root }}/../private/{{ inventory_hostname }}/cache"
     creates: "{{ site_root }}/../private/{{ inventory_hostname }}/civicrm.settings.php"
 
+# Related to comment above
+- name: Delete incorrectly created CiviCRM files and directories
+  file:
+    path: "{{ site_root }}/../private/{{ item }}"
+    state: absent
+  with_items:
+    - attachment
+    - cache
+    - civicrm.settings.php
+    - log
+
 # No need to run verify, since when the site status is set to enabled, Verify will run
 # Run the verify tasks, which will update the civicrm.settings.php
 # - include_tasks: "verify/{{ software }}.yml"
