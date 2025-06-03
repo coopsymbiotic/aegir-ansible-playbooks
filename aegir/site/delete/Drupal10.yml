@@ -1,0 +1,6 @@
+---
+
+- name: Delete the public directory
+  file:
+    path: "{{ site_root }}/sites/{{ inventory_hostname }}/"
+    state: absent
