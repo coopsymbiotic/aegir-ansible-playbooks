@@ -16,6 +16,11 @@
     - name: Run CMS-specific installation tasks
       include_tasks: "install/{{ software }}.yml"
 
+    - name: Run the post-install command
+      shell:
+        cmd: "{{ hostvars[platform_name]['site_post_install_cmd'] }}"
+      when: hostvars[platform_name]['site_post_install_cmd'] | length > 0
+
     - name: Run provision-enable
       shell:
         chdir: "/var/aegir/admin/web"

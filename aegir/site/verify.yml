@@ -56,6 +56,11 @@
     - name: Run CMS-specific tasks
       include_tasks: "verify/{{ software }}.yml"
 
+    - name: Run the post-verify command
+      shell:
+        cmd: "{{ hostvars[platform_name]['site_post_verify_cmd'] }}"
+      when: hostvars[platform_name]['site_post_verify_cmd'] | length > 0
+
     - name: Update the site verified status
       shell:
         chdir: "/var/aegir/admin/web"
