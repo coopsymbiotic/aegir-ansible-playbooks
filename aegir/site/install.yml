@@ -19,6 +19,7 @@
     - name: Run the post-install command
       shell:
         cmd: "{{ hostvars[platform_name]['site_post_install_cmd'] }}"
+        chdir: "{{ site_path }}"
       when: hostvars[platform_name]['site_post_install_cmd'] | length > 0
 
     - name: Run provision-enable
