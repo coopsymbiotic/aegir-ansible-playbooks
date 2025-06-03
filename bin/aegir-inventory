@@ -38,15 +38,16 @@ if [ -f "/var/aegir/config/.flag-http-hostmaster" ]; then
   port=80
 fi
 
-query_args="$AEGIR_INVENTORY_ARGS"
+# Avoid nginx cache
+query_args=$(date +%s)
 
 # Get JSON from an Aegir server.
 if [ "$AEGIR_INVENTORY_LOCAL" == "" ]; then
   # Running remotely, run via ssh because this page is restricted by IP
   # fixme: hardcoded ansible user
-  ssh deploy@${hostname} curl --silent "https://${hostname}/inventory${query_args}"
+  ssh deploy@${hostname} curl --silent "https://${hostname}/inventory?${query_args}"
 else
   # Running locally on the Aegir server
   # Use 'resolve' to force the request to be from 127.0.0.1 for allow/deny rules
-  curl --resolve $hostname:443:127.0.0.1 --insecure --silent "${proto}://${hostname}/inventory${query_args}"
+  curl --resolve $hostname:443:127.0.0.1 --insecure --silent "${proto}://${hostname}/inventory?${query_args}"
 fi
