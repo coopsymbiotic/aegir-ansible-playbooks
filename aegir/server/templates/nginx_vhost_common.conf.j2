@@ -1,0 +1,1191 @@
+#######################################################
+###  nginx.conf site level extended vhost include start
+#######################################################
+
+###
+### Use the main site name if available, instead of
+### potentially virtual server_name when alias is set
+### as redirection target. See #2358977 for details.
+###
+if ($main_site_name = '') {
+  set $main_site_name "$server_name";
+}
+
+###
+### Mitigation for https://www.drupal.org/SA-CORE-2018-002
+###
+set $rce "ZZ";
+if ( $query_string ~* (23value|23default_value|element_parents=%23) ) {
+  set $rce "A";
+}
+if ( $request_method = POST ) {
+  set $rce "${rce}B";
+}
+if ( $rce = "AB" ) {
+  return 403;
+}
+
+# coopsymbiotic/ops#169
+# This ends up causing problems with other Skip/Bypass clauses
+# but seems to work fine if we omit it.
+# set $nocache_details "Cache";
+
+###
+### Return 404 on special PHP URLs to avoid revealing version used,
+### even indirectly. See also: https://drupal.org/node/2116387
+###
+if ( $args ~* "=PHP[A-Z0-9]{8}-" ) {
+  return 404;
+}
+
+###
+### Deny crawlers.
+###
+if ($is_crawler) {
+  return 403;
+}
+
+###
+### Block semalt botnet.
+###
+if ($is_botnet) {
+  return 403;
+}
+
+###
+### Include high load protection config if exists.
+###
+include /data/conf/nginx_high_load.c*;
+
+###
+### Deny not compatible request methods without 405 response.
+### SYMBIOTIC: PATCH is required for CH-DMS
+###
+if ( $request_method !~ ^(?:GET|HEAD|POST|PUT|DELETE|OPTIONS|PATCH)$ ) {
+  return 403;
+}
+
+###
+### Deny listed requests for security reasons.
+###
+if ($is_denied) {
+  return 403;
+}
+
+###
+### Add recommended HTTP headers
+###
+add_header X-Content-Type-Options nosniff;
+add_header X-XSS-Protection "1; mode=block";
+
+###
+### HTTPRL standard support.
+###
+location ^~ /httprl_async_function_callback {
+  location ~* ^/httprl_async_function_callback {
+    access_log off;
+    set $nocache_details "Skip";
+    try_files  $uri @drupal;
+  }
+}
+
+###
+### HTTPRL test mode support.
+###
+location ^~ /admin/httprl-test {
+  location ~* ^/admin/httprl-test {
+    access_log off;
+    set $nocache_details "Skip";
+    try_files  $uri @drupal;
+  }
+}
+
+###
+### CDN Far Future expiration support.
+###
+location ^~ /cdn/farfuture/ {
+  access_log    off;
+  log_not_found off;
+  add_header ETag "";
+  gzip_http_version 1.1;
+  if_modified_since exact;
+  set $nocache_details "Skip";
+  location ~* ^/cdn/farfuture/.+\.(?:css|js|jpe?g|gif|png|ico|webp|bmp|svg|swf|pdf|docx?|xlsx?|pptx?|tiff?|txt|rtf|class|otf|ttf|woff2?|eot|less)$ {
+    expires max;
+    add_header X-Header "CDN Far Future Generator 1.0";
+    add_header Cache-Control "no-transform, public";
+    add_header Last-Modified "Wed, 20 Jan 1988 04:20:42 GMT";
+    add_header Access-Control-Allow-Origin *;
+    add_header X-Content-Type-Options nosniff;
+    add_header X-XSS-Protection "1; mode=block";
+    rewrite ^/cdn/farfuture/[^/]+/[^/]+/(.+)$ /$1 break;
+    try_files $uri @drupal;
+  }
+  location ~* ^/cdn/farfuture/ {
+    expires epoch;
+    add_header X-Header "CDN Far Future Generator 1.1";
+    add_header Cache-Control "private, must-revalidate, proxy-revalidate";
+    add_header Access-Control-Allow-Origin *;
+    add_header X-Content-Type-Options nosniff;
+    add_header X-XSS-Protection "1; mode=block";
+    rewrite ^/cdn/farfuture/[^/]+/[^/]+/(.+)$ /$1 break;
+    try_files $uri @drupal;
+  }
+  try_files $uri @drupal;
+}
+
+###
+### If favicon else return error 204.
+###
+location = /favicon.ico {
+  access_log    off;
+  log_not_found off;
+  expires       30d;
+  add_header Access-Control-Allow-Origin *;
+  add_header X-Content-Type-Options nosniff;
+  add_header X-XSS-Protection "1; mode=block";
+  try_files  /sites/$main_site_name/files/favicon.ico $uri =204;
+}
+
+###
+### Support for https://drupal.org/project/robotstxt module
+### and static file in the sites/domain/files directory.
+###
+location = /robots.txt {
+  access_log    off;
+  log_not_found off;
+  add_header Access-Control-Allow-Origin *;
+  add_header X-Content-Type-Options nosniff;
+  add_header X-XSS-Protection "1; mode=block";
+  try_files /sites/$main_site_name/files/$host.robots.txt /sites/$main_site_name/files/robots.txt /sites/$main_site_name/wp-content/$host.robots.txt /sites/$main_site_name/wp-content/robots.txt $uri @cache;
+}
+
+###
+### Support for static ads.txt file in the sites/domain/files directory.
+###
+location = /ads.txt {
+  access_log    off;
+  log_not_found off;
+  add_header Access-Control-Allow-Origin *;
+  add_header X-Content-Type-Options nosniff;
+  add_header X-XSS-Protection "1; mode=block";
+  try_files /sites/$main_site_name/files/$host.ads.txt /sites/$main_site_name/files/ads.txt $uri =404;
+}
+
+###
+### Allow local access to support wget method in Aegir settings
+### for running sites cron.
+###
+location = /cron.php {
+  try_files    $uri =404;
+  fastcgi_pass unix:/var/run/php/php-fpm.sock;
+}
+
+###
+### Allow local access to support wget method in Aegir settings
+### for running sites cron in Drupal 8+.
+###
+location ^~ /cron/ {
+  set $nocache_details "Skip";
+  try_files    $uri @drupal;
+}
+
+###
+### Send search to php-fpm early so searching for node.js will work.
+### Deny bots on search uri.
+###
+location ^~ /search {
+  location ~* ^/search {
+    if ( $is_bot ) {
+      return 403;
+    }
+    try_files $uri @drupal;
+  }
+}
+
+###
+### Fix for #2005116
+###
+location ^~ /hosting/sites {
+  if ( $is_bot ) {
+    return 403;
+  }
+  access_log off;
+  set $nocache_details "Skip";
+  try_files $uri @drupal;
+}
+
+###
+### Fix for Aegir & .info .pl domain extensions.
+###
+location ^~ /hosting {
+  if ( $is_bot ) {
+    return 403;
+  }
+  access_log off;
+  set $nocache_details "Skip";
+  try_files $uri @drupal;
+}
+
+###
+### Support for backup_migrate module download/restore/delete actions.
+###
+location ^~ /admin {
+  if ( $is_bot ) {
+    return 403;
+  }
+  access_log off;
+  set $nocache_details "Skip";
+  try_files $uri @drupal;
+}
+
+###
+### CiviCRM
+###
+### SYMBIOTIC - Always cache Mosaico images (and multilingual)
+location ^~ /civicrm/mosaico/img {
+  try_files $uri @drupal;
+}
+location ~* ^/\w\w/civicrm/mosaico/img {
+  try_files $uri @drupal;
+}
+### SYMBIOTIC - Always cache Contact Images (and multilingual)
+# This is mostly for images exposed by SearchKit
+location ^~ /civicrm/contact/imagefile {
+  try_files $uri @drupal;
+}
+location ~* ^/\w\w/civicrm/contact/imagefile {
+  try_files $uri @drupal;
+}
+
+### SYMBIOTIC - Do not cache other CiviCRM pages and always log (and multilingual)
+location ^~ /civicrm {
+  set $nocache_details "Skip";
+  try_files $uri @drupal;
+}
+location ~* ^/\w\w/civicrm {
+  set $nocache_details "Skip";
+  try_files $uri @drupal;
+}
+
+### SYMBIOTIC - CH-DMS: Always cache images, do not cache other pages
+location ^~ /dms/mosaico/img {
+  try_files $uri @drupal;
+}
+location ^~ /dms/contact/imagefile {
+  try_files $uri @drupal;
+}
+location ^~ /dms {
+  set $nocache_details "Skip";
+  try_files $uri @drupal;
+}
+
+### SYMBIOTIC - URLs used by the CS admin UI
+location ^~ /cs {
+  set $nocache_details "Skip";
+  try_files $uri @drupal;
+}
+location ~* ^/\w\w/cs {
+  set $nocache_details "Skip";
+  try_files $uri @drupal;
+}
+
+### SYMBIOTIC - Workaround for drush bug and CiviCRM Spark signups
+rewrite ^/usr/local/bin/user/reset/(.*)$ /user/reset/$1 redirect;
+
+###
+### Support for audio module.
+###
+location ^~ /audio/download {
+  location ~* ^/audio/download/.*/.*\.(?:mp3|mp4|m4a|ogg)$ {
+    if ( $is_bot ) {
+      return 403;
+    }
+    access_log    off;
+    log_not_found off;
+    set $nocache_details "Skip";
+    try_files $uri @drupal;
+  }
+}
+
+###
+### Deny listed requests for security reasons.
+###
+location ~* (\.(?:git.*|htaccess|engine|config|inc|ini|info|install|make|module|profile|test|pl|po|sh|.*sql|theme|twig|tpl(\.php)?|xtmpl|yml)(~|\.sw[op]|\.bak|\.orig|\.save)?$|^(\..*|Entries.*|Repository|Root|Tag|Template|composer\.(json|lock))$|^#.*#$|\.php(~|\.sw[op]|\.bak|\.orig\.save))$ {
+  access_log off;
+  return 404;
+}
+
+###
+### Deny listed requests for security reasons.
+###
+location ~* /(?:modules|themes|libraries)/.*\.(?:txt|md)$ {
+  access_log off;
+  return 404;
+}
+
+###
+### Deny listed requests for security reasons.
+###
+location ~* ^/sites/.*/files/civicrm/(?:ConfigAndLog|custom|upload|templates_c) {
+  access_log off;
+  return 404;
+}
+
+###
+### [Option] Deny public access to webform uploaded files
+### for privacy reasons and to prevent phishing attacks.
+### The files uploaded should be available only via SFTP.
+###
+location ~* ^/sites/.*/files/webform/ {
+  access_log off;
+  log_not_found off;
+  expires 99s;
+  add_header Cache-Control "public, must-revalidate, proxy-revalidate";
+  add_header X-Content-Type-Options nosniff;
+  add_header X-XSS-Protection "1; mode=block";
+  try_files $uri =404;
+  ### to deny the access replace the last line with:
+  ### return 404;
+}
+location ~* ^/files/webform/ {
+  access_log off;
+  log_not_found off;
+  expires 99s;
+  add_header Cache-Control "public, must-revalidate, proxy-revalidate";
+  add_header X-Content-Type-Options nosniff;
+  add_header X-XSS-Protection "1; mode=block";
+  try_files $uri =404;
+  ### to deny the access replace the last line with:
+  ### return 404;
+}
+
+###
+### Deny often flooded URI for performance reasons
+###
+location = /autodiscover/autodiscover.xml {
+  access_log off;
+  return 404;
+}
+
+###
+### Deny some not supported URI like cgi-bin on the Nginx level.
+###
+location ~* (?:cgi-bin|vti-bin) {
+  access_log off;
+  return 404;
+}
+
+###
+### Deny bots on some weak modules uri.
+###
+location ~* (?:validation|aggregator|vote_up_down|captcha|vbulletin|glossary/) {
+  if ( $is_bot ) {
+    return 403;
+  }
+  access_log off;
+  try_files $uri @drupal;
+}
+
+###
+### Responsive Images support.
+### https://drupal.org/project/responsive_images
+###
+location ~* \.r\.(?:jpe?g|png|gif) {
+  if ( $http_cookie ~* "rwdimgsize=large" ) {
+    rewrite ^/(.*)/mobile/(.*)\.r(\.(?:jpe?g|png|gif))$ /$1/desktop/$2$3 last;
+  }
+  rewrite ^/(.*)\.r(\.(?:jpe?g|png|gif))$ /$1$2 last;
+  access_log off;
+  set $nocache_details "Skip";
+  try_files  $uri @drupal;
+}
+
+###
+### Adaptive Image Styles support.
+### https://drupal.org/project/ais
+###
+location ~* /(?:.+)/files/(css|js|styles)/adaptive/(?:.+)$ {
+  if ( $http_cookie ~* "ais=(?<ais_cookie>[a-z0-9-_]+)" ) {
+    rewrite ^/(.+)/files/(css|js|styles)/adaptive/(.+)$ /$1/files/$2/$ais_cookie/$3 last;
+  }
+  access_log off;
+  set $nocache_details "Skip";
+  try_files  $uri @drupal;
+}
+
+###
+### The files/styles support.
+###
+location ~* /sites/.*/files/(css|js|styles)/(.*)$ {
+  access_log off;
+  log_not_found off;
+  expires    max;
+  add_header Access-Control-Allow-Origin *;
+  add_header X-Content-Type-Options nosniff;
+  add_header X-XSS-Protection "1; mode=block";
+  add_header Cache-Control "public";
+  try_files  /sites/$main_site_name/files/$1/$2 $uri @drupal;
+}
+
+###
+### JS support for Backdrop
+###
+location ~* /js/(.*)$ {
+  access_log off;
+  log_not_found off;
+  expires    max;
+  add_header Access-Control-Allow-Origin *;
+  add_header X-Content-Type-Options nosniff;
+  add_header X-XSS-Protection "1; mode=block";
+  add_header Cache-Control "public";
+  try_files  $uri @drupal;
+}
+
+###
+### The s3/files/styles (s3fs) support.
+###
+location ~* /s3/files/(css|js|styles)/(.*)$ {
+  access_log off;
+  log_not_found off;
+  expires    max;
+  add_header Access-Control-Allow-Origin *;
+  add_header X-Content-Type-Options nosniff;
+  add_header X-XSS-Protection "1; mode=block";
+  add_header Cache-Control "public";
+  try_files  /sites/$main_site_name/files/$1/$2 $uri @drupal;
+}
+
+###
+### The files/imagecache support.
+###
+location ~* /sites/.*/files/imagecache/(.*)$ {
+  access_log off;
+  log_not_found off;
+  expires    30d;
+  add_header Access-Control-Allow-Origin *;
+  add_header X-Content-Type-Options nosniff;
+  add_header X-XSS-Protection "1; mode=block";
+  # fix common problems with old paths after import from standalone to Aegir multisite
+  rewrite ^/sites/(.*)/files/imagecache/(.*)/sites/default/files/(.*)$ /sites/$main_site_name/files/imagecache/$2/$3 last;
+  rewrite ^/sites/(.*)/files/imagecache/(.*)/files/(.*)$               /sites/$main_site_name/files/imagecache/$2/$3 last;
+  set $nocache_details "Skip";
+  try_files  /sites/$main_site_name/files/imagecache/$1 $uri @drupal;
+}
+
+###
+### Send requests with /external/ and /system/ URI keywords to @drupal.
+###
+location ~* /(?:external|system)/ {
+  access_log off;
+  log_not_found off;
+  expires    30d;
+  set $nocache_details "Skip";
+  try_files  $uri @drupal;
+}
+
+###
+### Deny direct access to backups.
+###
+location ~* ^/sites/.*/files/backup_migrate/ {
+  access_log off;
+  deny all;
+}
+
+###
+### Deny direct access to config files in Drupal 8+.
+###
+location ~* ^/sites/.*/files/config_.* {
+  access_log off;
+  deny all;
+}
+
+###
+### Private downloads are always sent to the drupal backend.
+### Note: this location doesn't work with X-Accel-Redirect.
+###
+location ~* ^/sites/.*/files/private/ {
+  if ( $is_bot ) {
+    return 403;
+  }
+  access_log off;
+  rewrite    ^/sites/.*/files/private/(.*)$ $scheme://$host/system/files/private/$1 permanent;
+  set $nocache_details "Skip";
+  try_files  $uri @drupal;
+}
+
+###
+### Deny direct access to private downloads in sites/domain/private.
+### Note: this location works with X-Accel-Redirect.
+###
+location ~* ^/sites/.*/private/ {
+  internal;
+  if ( $is_bot ) {
+    return 403;
+  }
+  access_log off;
+}
+
+###
+### Deny direct access to private downloads also for short, rewritten URLs.
+### Note: this location works with X-Accel-Redirect.
+###
+location ~* /files/private/ {
+  internal;
+  if ( $is_bot ) {
+    return 403;
+  }
+  access_log off;
+}
+
+###
+### Wysiwyg Fields support.
+###
+location ~* wysiwyg_fields/(?:plugins|scripts)/.*\.(?:js|css) {
+  access_log off;
+  log_not_found off;
+  add_header Access-Control-Allow-Origin *;
+  add_header X-Content-Type-Options nosniff;
+  add_header X-XSS-Protection "1; mode=block";
+  try_files $uri @drupal;
+}
+
+###
+### Advagg_css and Advagg_js support.
+###
+location ~* files/advagg_(?:css|js)/ {
+  expires    max;
+  access_log off;
+  add_header ETag "";
+  rewrite    ^/files/advagg_(.*)/(.*)$ /sites/$main_site_name/files/advagg_$1/$2 last;
+  add_header X-Header "AdvAgg Generator 2.0";
+  add_header Cache-Control "max-age=31449600, no-transform, public";
+  add_header Access-Control-Allow-Origin *;
+  add_header X-Content-Type-Options nosniff;
+  add_header X-XSS-Protection "1; mode=block";
+  set $nocache_details "Skip";
+  try_files  $uri @drupal;
+}
+
+###
+### Make css files compatible with boost caching.
+###
+location ~* \.css$ {
+  if ( $request_method = POST ) {
+    return 405;
+  }
+  if ( $cache_uid ) {
+    return 405;
+  }
+  error_page  405 = @uncached;
+  access_log  off;
+  expires     max; #if using aggregator
+  add_header Access-Control-Allow-Origin *;
+  add_header X-Content-Type-Options nosniff;
+  add_header X-XSS-Protection "1; mode=block";
+  # Symbiotic customization for static sites
+  try_files  /sites/$host/static-html/${uri}.css $uri =404;
+}
+
+###
+### Support for dynamic /sw.js requests. See #2982073 on drupal.org
+###
+location = /sw.js {
+  try_files $uri @drupal;
+}
+
+###
+### Make js files compatible with boost caching.
+###
+location ~* \.(?:js|htc)$ {
+  if ( $request_method = POST ) {
+    return 405;
+  }
+  if ( $cache_uid ) {
+    return 405;
+  }
+  error_page  405 = @uncached;
+  access_log  off;
+  expires     max; # if using aggregator
+  add_header Access-Control-Allow-Origin *;
+  add_header X-Content-Type-Options nosniff;
+  add_header X-XSS-Protection "1; mode=block";
+  # Symbiotic customization for static sites
+  try_files  /sites/$host/static-html/${uri}.js $uri =404;
+}
+
+###
+### Deny listed requests for security reasons.
+###
+location = /composer.json {
+  access_log off;
+  return 404;
+}
+location = /composer.lock {
+  access_log off;
+  return 404;
+}
+# Added by Symbiotic
+location ^~ /vendor/composer/ {
+  return 404;
+}
+location = /CHANGELOG.txt {
+  return 404;
+}
+
+###
+### Support for dynamic .json requests.
+###
+location ~* \.json$ {
+  try_files $uri @drupal;
+}
+
+###
+### Support for static .json files with fast 404 +Boost compatibility.
+###
+location ~* ^/sites/.*/files/.*\.json$ {
+  if ( $cache_uid ) {
+    return 405;
+  }
+  error_page  405 = @uncached;
+  access_log  off;
+  expires     max; ### if using aggregator
+  add_header Access-Control-Allow-Origin *;
+  add_header X-Content-Type-Options nosniff;
+  add_header X-XSS-Protection "1; mode=block";
+  try_files   /cache/normal/$host${uri}_.json $uri =404;
+}
+
+###
+### Helper location to bypass boost static files cache for logged in users.
+###
+location @uncached {
+  access_log off;
+  expires max; # max if using aggregator, otherwise sane expire time
+}
+
+###
+### Map /files/ shortcut early to avoid overrides in other locations.
+###
+location ^~ /files/ {
+
+  add_header Access-Control-Allow-Origin *;
+  add_header X-Content-Type-Options nosniff;
+  add_header X-XSS-Protection "1; mode=block";
+
+  ###
+  ### Sub-location to support files/css with short URIs.
+  ###
+  location ~* /files/css/(.*)$ {
+    access_log off;
+    log_not_found off;
+    expires    30d;
+    set $nocache_details "Skip";
+    rewrite  ^/files/(.*)$  /sites/$main_site_name/files/$1 last;
+    try_files  /sites/$main_site_name/files/css/$1 $uri @drupal;
+  }
+
+  ###
+  ### Sub-location to support files/js with short URIs.
+  ###
+  location ~* /files/js/(.*)$ {
+    access_log off;
+    log_not_found off;
+    expires    30d;
+    set $nocache_details "Skip";
+    rewrite  ^/files/(.*)$  /sites/$main_site_name/files/$1 last;
+    try_files  /sites/$main_site_name/files/js/$1 $uri @drupal;
+  }
+
+  ###
+  ### Sub-location to support files/styles with short URIs.
+  ###
+  location ~* /files/(css|js|styles)/(.*)$ {
+    access_log off;
+    log_not_found off;
+    expires    30d;
+    set $nocache_details "Skip";
+    rewrite  ^/files/(.*)$  /sites/$main_site_name/files/$1 last;
+    try_files  /sites/$main_site_name/files/$1/$2 $uri @drupal;
+  }
+
+  ###
+  ### Sub-location to support files/imagecache with short URIs.
+  ###
+  location ~* /files/imagecache/(.*)$ {
+    access_log off;
+    log_not_found off;
+    expires    30d;
+    # fix common problems with old paths after import from standalone to Aegir multisite
+    rewrite ^/files/imagecache/(.*)/sites/default/files/(.*)$ /sites/$main_site_name/files/imagecache/$1/$2 last;
+    rewrite ^/files/imagecache/(.*)/files/(.*)$               /sites/$main_site_name/files/imagecache/$1/$2 last;
+    rewrite ^/sites/(.*)/files/imagecache/(.*)/sites/(.*)/files/(.*)$ /sites/$main_site_name/files/imagecache/$2/$4 last;
+    set $nocache_details "Skip";
+    rewrite  ^/files/(.*)$  /sites/$main_site_name/files/$1 last;
+    try_files  /sites/$main_site_name/files/imagecache/$1 $uri @drupal;
+  }
+
+  location ~* ^.+\.(?:pdf|jpe?g|gif|png|ico|webp|bmp|svg|swf|docx?|xlsx?|pptx?|tiff?|txt|rtf|vcard|vcf|cgi|bat|pl|dll|class|otf|ttf|woff2?|eot|less|avi|mpe?g|mov|wmv|mp3|ogg|ogv|wav|midi|zip|tar|t?gz|rar|dmg|exe|apk|pxl|ipa|css|js)$ {
+    expires       30d;
+    access_log    off;
+    log_not_found off;
+    rewrite  ^/files/(.*)$  /sites/$main_site_name/files/$1 last;
+    try_files   $uri =404;
+  }
+  try_files $uri @cache;
+}
+
+###
+### Map /downloads/ shortcut early to avoid overrides in other locations.
+###
+location ^~ /downloads/ {
+  location ~* ^.+\.(?:pdf|jpe?g|gif|png|ico|webp|bmp|svg|swf|docx?|xlsx?|pptx?|tiff?|txt|rtf|vcard|vcf|cgi|bat|pl|dll|class|otf|ttf|woff2?|eot|less|avi|mpe?g|mov|wmv|mp3|ogg|ogv|wav|midi|zip|tar|t?gz|rar|dmg|exe|apk|pxl|ipa)$ {
+    expires       30d;
+    access_log    off;
+    log_not_found off;
+    add_header Access-Control-Allow-Origin *;
+    add_header X-Content-Type-Options nosniff;
+    add_header X-XSS-Protection "1; mode=block";
+    rewrite  ^/downloads/(.*)$  /sites/$main_site_name/files/downloads/$1 last;
+    try_files   $uri =404;
+  }
+  try_files $uri @cache;
+}
+
+###
+### Serve & no-log static files & images directly,
+### without all standard drupal rewrites, php-fpm etc.
+###
+location ~* ^.+\.(?:jpe?g|gif|png|ico|webp|bmp|svg|swf|docx?|xlsx?|pptx?|tiff?|txt|rtf|vcard|vcf|cgi|bat|pl|dll|class|otf|ttf|woff2?|eot|less|mp3|wav|midi)$ {
+  expires       30d;
+  access_log    off;
+  log_not_found off;
+  add_header Access-Control-Allow-Origin *;
+  add_header X-Content-Type-Options nosniff;
+  add_header X-XSS-Protection "1; mode=block";
+  rewrite     ^/images/(.*)$  /sites/$main_site_name/files/images/$1 last;
+  rewrite     ^/.+/sites/.+/files/(.*)$  /sites/$main_site_name/files/$1 last;
+  try_files   $uri =404;
+}
+
+###
+### Serve bigger media/static/archive files directly,
+### without all standard drupal rewrites, php-fpm etc.
+###
+location ~* ^.+\.(?:avi|mpe?g|mov|wmv|ogg|ogv|webm|zip|tar|t?gz|rar|dmg|exe|apk|pxl|ipa)$ {
+  expires     30d;
+  access_log    off;
+  log_not_found off;
+  add_header Access-Control-Allow-Origin *;
+  add_header X-Content-Type-Options nosniff;
+  add_header X-XSS-Protection "1; mode=block";
+  rewrite     ^/.+/sites/.+/files/(.*)$  /sites/$main_site_name/files/$1 last;
+  try_files   $uri =404;
+}
+
+###
+### Serve & no-log some static files directly,
+### but only from the files directory to not break
+### dynamically created pdf files or redirects for
+### legacy URLs with asp/aspx extension.
+###
+location ~* ^/sites/.+/files/.+\.(?:pdf|aspx?)$ {
+  expires       30d;
+  access_log    off;
+  log_not_found off;
+  add_header Access-Control-Allow-Origin *;
+  add_header X-Content-Type-Options nosniff;
+  add_header X-XSS-Protection "1; mode=block";
+  try_files   $uri =404;
+}
+
+###
+### Serve & no-log some static files as is, without forcing default_type.
+###
+location ~* /(?:cross-?domain)\.xml$ {
+  access_log  off;
+  expires     30d;
+  add_header Access-Control-Allow-Origin *;
+  add_header X-Content-Type-Options nosniff;
+  add_header X-XSS-Protection "1; mode=block";
+  try_files   $uri =404;
+}
+
+###
+### Allow some known php files (like serve.php in the ad module).
+###
+# Symbiotic: added moxiemanager
+location ~* /(?:modules|libraries)/(?:contrib/)?(?:ad|tinybrowser|f?ckeditor|tinymce|wysiwyg_spellcheck|ecc|civicrm|fbconnect|radioactivity|statistics|moxiemanager)/.*\.php$ {
+  # [ML] SYMBIOTIC - Always log requests to the REST endpoint
+  # access_log   off;
+  if ( $is_bot ) {
+    return 403;
+  }
+  try_files    $uri =404;
+  fastcgi_pass unix:/var/run/php/php-fpm.sock;
+}
+
+###
+### Deny crawlers and never cache known AJAX requests.
+###
+location ~* /(?:ahah|ajax|batch|autocomplete|progress/|x-progress-id|js/.*) {
+  if ( $is_bot ) {
+    return 403;
+  }
+  access_log off;
+  log_not_found off;
+  set $nocache_details "Skip";
+  try_files $uri @drupal;
+}
+
+###
+### Serve & no-log static helper files used in some wysiwyg editors.
+###
+location ~* ^/sites/.*/(?:modules|libraries)/(?:contrib/)?(?:tinybrowser|f?ckeditor|tinymce|flowplayer|jwplayer|videomanager)/.*\.(?:html?|xml)$ {
+  if ( $is_bot ) {
+    return 403;
+  }
+  access_log      off;
+  expires         30d;
+  add_header Access-Control-Allow-Origin *;
+  add_header X-Content-Type-Options nosniff;
+  add_header X-XSS-Protection "1; mode=block";
+  try_files $uri =404;
+}
+
+###
+### Serve & no-log any not specified above static files directly.
+###
+location ~* ^/sites/.*/files/ {
+  access_log      off;
+  expires         30d;
+  add_header Access-Control-Allow-Origin *;
+  add_header X-Content-Type-Options nosniff;
+  add_header X-XSS-Protection "1; mode=block";
+  try_files $uri =404;
+}
+
+###
+### Make feeds compatible with boost caching and set correct mime type.
+###
+location ~* \.xml$ {
+  location ~* ^/autodiscover/autodiscover\.xml {
+    access_log off;
+    return 400;
+  }
+  if ( $request_method = POST ) {
+    return 405;
+  }
+  if ( $cache_uid ) {
+    return 405;
+  }
+  error_page 405 = @drupal;
+  access_log off;
+  add_header X-Header "Boost Citrus 1.0";
+  add_header Expires "Tue, 24 Jan 1984 08:00:00 GMT";
+  add_header Cache-Control "no-store, no-cache, must-revalidate, post-check=0, pre-check=0";
+  add_header Access-Control-Allow-Origin *;
+  add_header X-Content-Type-Options nosniff;
+  add_header X-XSS-Protection "1; mode=block";
+  charset    utf-8;
+  types { }
+  default_type text/xml;
+  try_files /cache/normal/$host${uri}_.xml /cache/normal/$host${uri}_.html $uri @drupal;
+}
+
+###
+### Deny bots on never cached uri.
+###
+location ~* ^/(?:admin|user|cart|checkout|logout) {
+  if ( $is_bot ) {
+    return 403;
+  }
+  access_log off;
+  set $nocache_details "Skip";
+  try_files $uri @drupal;
+}
+location ~* ^/\w\w/(?:admin|user|cart|checkout|logout) {
+  if ( $is_bot ) {
+    return 403;
+  }
+  access_log off;
+  set $nocache_details "Skip";
+  try_files $uri @drupal;
+}
+
+###
+### Protect from DoS attempts on never cached uri.
+###
+location ~* ^/(?:.*/)?(?:node/[0-9]+/edit|node/add|comment/reply) {
+  if ( $is_bot ) {
+    return 403;
+  }
+  access_log off;
+  set $nocache_details "Skip";
+  try_files $uri @drupal;
+}
+
+###
+### Protect from DoS attempts on never cached uri.
+###
+location ~* ^/(?:.*/)?(?:node/[0-9]+/delete|approve) {
+  if ($cache_uid = '') {
+    return 403;
+  }
+  if ( $is_bot ) {
+    return 403;
+  }
+  access_log off;
+  set $nocache_details "Skip";
+  try_files $uri @drupal;
+}
+
+
+###
+### Catch all unspecified requests.
+###
+location / {
+  try_files $uri @cache;
+}
+
+###
+### Boost compatible cache check.
+###
+location @cache {
+  if ( $request_method = POST ) {
+    set $nocache_details "Method";
+    return 405;
+  }
+  if ( $args ~* "nocache=1" ) {
+    set $nocache_details "Args";
+    return 405;
+  }
+  if ( $sent_http_x_force_nocache = "YES" ) {
+    set $nocache_details "Skip";
+    return 405;
+  }
+  if ( $http_cookie ~* "NoCacheID" ) {
+    set $nocache_details "AegirCookie";
+    return 405;
+  }
+  if ( $cache_uid ) {
+    set $nocache_details "DrupalCookie";
+    return 405;
+  }
+  error_page 405 = @drupal;
+  # Symbiotic: we do not use boost, but sometimes archive sites
+  add_header X-Symbiotic "Static HTML in sites/x/static-html setup by provision_symbiotic";
+  # [ML] SYMBIOTIC This is a bit too aggressive
+  # add_header Expires "Tue, 24 Jan 1984 08:00:00 GMT";
+  # add_header Cache-Control "no-store, no-cache, must-revalidate, post-check=0, pre-check=0";
+  add_header Expires 1h;
+  add_header Pragma public;
+  add_header Cache-Control "public";
+  add_header Access-Control-Allow-Origin *;
+  add_header X-Content-Type-Options nosniff;
+  add_header X-XSS-Protection "1; mode=block";
+  charset    utf-8;
+  # [ML] SYMBIOTIC We also try without $args so that archiving is easier
+  try_files  /sites/$host/static-html/${uri}_$args.html /sites/$host/static-html/${uri}.html @drupal;
+}
+
+###
+### Send all not cached requests to drupal with clean URLs support.
+###
+location @drupal {
+
+  ###
+  ### Detect Drupal core variant
+  ###
+  set $core_detected "Legacy";
+  set $location_detected "Nowhere";
+
+  if ( -e $document_root/web.config ) {
+    set $core_detected "Regular";
+  }
+  if ( -e $document_root/core ) {
+    set $core_detected "Modern";
+  }
+  # Symbiotic
+  if ( -e $document_root/wp-config.php ) {
+    set $core_detected "WordPress";
+  }
+
+  ###
+  ### Drupal core specific location switch
+  ###
+  error_page 402 = @legacy;
+  if ( $core_detected = Legacy ) {
+    return 402;
+  }
+  error_page 406 = @regular;
+  if ( $core_detected = Regular ) {
+    return 406;
+  }
+  error_page 418 = @modern;
+  if ( $core_detected = Modern ) {
+    return 418;
+  }
+  # Symbiotic
+  error_page 419 = @wordpress;
+  if ( $core_detected = WordPress ) {
+    return 419;
+  }
+
+  ###
+  ### Fallback to regular / D7 style rewrite
+  ###
+  set $location_detected "Fallback";
+  rewrite ^ /index.php?$query_string? last;
+}
+
+###
+### Special location for Drupal 6.
+###
+location @legacy {
+  set $location_detected "Legacy";
+  rewrite ^/(.*)$ /index.php?q=$1 last;
+}
+
+###
+### Special location for Drupal 7.
+###
+location @regular {
+  set $location_detected "Regular";
+  rewrite ^ /index.php?$query_string? last;
+}
+
+###
+### Special location for Drupal 8+.
+###
+location @modern {
+  set $location_detected "Modern";
+  try_files $uri /index.php?$query_string;
+}
+
+###
+### Special location for WordPress (Symbiotic).
+###
+location @wordpress {
+  # https://wordpress.org/support/article/nginx/#general-wordpress-rules
+  set $location_detected "WordPress";
+  try_files $uri $uri/ /index.php?$args;
+}
+
+###
+### Send all non-static requests to php-fpm, restricted to known php file.
+###
+location = /index.php {
+  add_header X-Core-Variant "$core_detected";
+  add_header X-Loc-Where "$location_detected";
+  add_header X-Http-Pragma "$http_pragma";
+  add_header X-Arg-Nocache "$arg_nocache";
+  add_header X-Arg-Comment "$arg_comment";
+  add_header X-Speed-Cache "$upstream_cache_status";
+  add_header X-Speed-Cache-UID "$cache_uid";
+  add_header X-Speed-Cache-Key "$key_uri";
+  add_header X-NoCache "$nocache_details";
+  add_header X-This-Proto "$http_x_forwarded_proto";
+  add_header X-Server-Name "$main_site_name";
+  add_header X-Content-Type-Options nosniff;
+  add_header X-XSS-Protection "1; mode=block";
+
+  # [ML] SymbioTIC facil/civicrm#21191
+  add_header Strict-Transport-Security $symbiotic_hsts;
+  add_header Content-Security-Policy $symbiotic_security_policy;
+
+  add_header Cache-Control "no-store, no-cache, must-revalidate, post-check=0, pre-check=0";
+  try_files     $uri =404; ### check for existence of php file first
+  fastcgi_pass  unix:/var/run/php/php-fpm.sock;
+  ###
+  ### Detect supported no-cache exceptions
+  ###
+  if ( $request_method = POST ) {
+    set $nocache_details "Method";
+  }
+  if ( $args ~* "nocache=1" ) {
+    set $nocache_details "Args";
+  }
+  if ( $sent_http_x_force_nocache = "YES" ) {
+    set $nocache_details "Skip";
+  }
+  if ( $http_cookie ~* "NoCacheID" ) {
+    set $nocache_details "AegirCookie";
+  }
+  if ( $cache_uid ) {
+    set $nocache_details "DrupalCookie";
+  }
+  ###
+  ### Use Nginx cache for all visitors by default.
+  ###
+  set $nocache "";
+  ### [ML] Added DrupalCookie to the mix (for drupal admin forms), but was maybe fixed by the above blocks
+  if ( $nocache_details ~ (?:AegirCookie|DrupalCookie|Args|Skip) ) {
+    set $nocache "NoCache";
+  }
+  add_header X-Debug-NoCache-Switch "$nocache";
+  add_header X-Debug-NoCache-Auth "$http_authorization";
+  add_header X-Debug-NoCache-Cookie "$cookie_NoCacheID";
+  fastcgi_cache speed;
+  fastcgi_cache_methods GET HEAD; ### Nginx default, but added for clarity
+  fastcgi_cache_min_uses 1;
+  fastcgi_cache_key "$scheme$is_bot$device$host$request_method$key_uri$cache_uid$http_x_forwarded_proto$sent_http_x_local_proto$cookie_respimg";
+  # Symbiotic: cache 60 seconds (was 10s)
+  fastcgi_cache_valid 200 60s;
+  fastcgi_cache_valid 301 302 403 404 1s;
+  fastcgi_cache_valid any 1s;
+  fastcgi_cache_lock on;
+  fastcgi_ignore_headers Cache-Control Expires Vary;
+  fastcgi_pass_header Set-Cookie;
+  fastcgi_pass_header X-Accel-Expires;
+  fastcgi_pass_header X-Accel-Redirect;
+  fastcgi_no_cache $cookie_NoCacheID $http_authorization $nocache;
+  fastcgi_cache_bypass $cookie_NoCacheID $http_authorization $nocache;
+  fastcgi_cache_use_stale error http_500 http_503 invalid_header timeout updating;
+}
+
+###
+### Support for the CiviCRM iframe core-extension
+###
+location /iframe.php {
+  add_header X-Content-Type-Options nosniff;
+  add_header X-XSS-Protection "1; mode=block";
+  add_header Strict-Transport-Security $symbiotic_hsts;
+  add_header Content-Security-Policy $symbiotic_security_policy;
+  add_header Cache-Control "no-store, no-cache, must-revalidate, post-check=0, pre-check=0";
+  # @todo Might help for Drupal?
+  # add_header X-Frame-Options "";
+
+  fastcgi_split_path_info ^(.+\.php)(/.+)$;
+  fastcgi_param PATH_INFO $fastcgi_path_info;
+  fastcgi_param SCRIPT_FILENAME $document_root/iframe.php;
+  fastcgi_index iframe.php;
+  include fastcgi_params;
+  fastcgi_pass  unix:/var/run/php/php-fpm.sock;
+}
+
+###
+### Send other known php requests/files to php-fpm without any caching.
+### [ML] SYMBIOTIC Removed boost, added 'install' for Backdrop
+###
+location ~* ^/(?:core/)?(?:boost_stats|rtoc|js|install)\.php$ {
+  access_log   off;
+  try_files    $uri =404; ### check for existence of php file first
+  fastcgi_pass unix:/var/run/php/php-fpm.sock;
+}
+
+###
+### Deny access to /authorize.php and /update.php
+### [ML] SYMBIOTIC Removed - we do not use this and some clients raised
+### concerns about it being accessible to users of a member site, for example.
+
+###
+### Deny access to any not listed above php files with 404 error.
+###
+location ~* ^.+\.php$ {
+  return 404;
+}
+
+#######################################################
+###  nginx.conf site level extended vhost include end
+#######################################################
