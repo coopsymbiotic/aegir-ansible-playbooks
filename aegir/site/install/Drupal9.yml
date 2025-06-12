@@ -1,0 +1,33 @@
+---
+
+- name: Install Drupal 9
+  become: true
+  become_user: aegir
+  shell:
+    chdir: "{{ site_path }}"
+    cmd: "drush site-install {{ profile }} --db-url=mysql://{{ db_name }}:{{ db_passwd }}@{{ db_host }}:{{ db_port }}/{{ db_name}} --site-name={{ inventory_hostname }} --sites-subdir={{ inventory_hostname }} --site-mail=fixme@example.org --locale=en"
+    creates: "{{ site_path }}/settings.php"
+
+- name: Change the site directory permissions temporarily
+  file:
+    path: "{{ site_path }}"
+    state: directory
+    mode: 0750
+
+- name: Check if the platform has CiviCRM
+  stat:
+    path: "{{ site_root }}/../vendor/civicrm/civicrm-core/xml/version.xml"
+  register: civicheck
+
+# FIXME @todo language
+- name: Install CiviCRM
+  shell:
+    chdir: "{{ site_path }}"
+    cmd: "cv core:install --cms-base-url=https://{{ inventory_hostname }}/ --lang=en_US"
+    creates: "{{ site_path }}/civicrm.settings.php"
+
+- name: Change the site directory permissions back to normal
+  file:
+    path: "{{ site_path }}"
+    state: directory
+    mode: 0550

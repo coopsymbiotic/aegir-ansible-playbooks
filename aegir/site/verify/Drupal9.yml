@@ -1,3 +1,20 @@
 ---
 
-# todo
+- include_tasks: Drupal9/settings.yml
+
+- name: Drupal9 | Run fix permissions
+  shell:
+    chdir: "{{ site_path }}"
+    cmd: "/usr/local/aegir-ansible-playbooks/bin/fix-drupal-permissions.sh --site-path='{{ site_path }}'"
+  tags:
+    - drupal-fixpermissions
+
+# @todo Remove the cron if the CiviCRM plugin is disabled
+- include_tasks: Drupal9/civicrm-cron.yml
+  when: "'civicrm_sites' in group_names"
+  tags:
+    - cron-civicrm
+
+- include_tasks: Drupal9/cms-cron.yml
+  tags:
+    - cron-cms

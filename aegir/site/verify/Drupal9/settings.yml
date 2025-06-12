@@ -1,0 +1,27 @@
+---
+
+- name: Update the settings.php file for the site
+  template:
+    src: "Drupal9/settings.php.j2"
+    dest: "{{ site_path }}/settings.php"
+    owner: aegir
+    group: www-data
+    mode: 0440
+
+- name: Update the drushrc.php file for the site
+  template:
+    src: "site.drushrc.php.j2"
+    dest: "{{ site_path }}/drushrc.php"
+    owner: aegir
+    group: www-data
+    mode: 0440
+
+- name: Update the CiviCRM settings
+  template:
+    src: "CiviCRM/civicrm.settings.php.j2"
+    dest: "{{ site_path }}/civicrm.settings.php"
+    owner: aegir
+    group: www-data
+    mode: 0440
+  when: civicrm_site_key is defined
+
