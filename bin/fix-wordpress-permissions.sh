@@ -59,7 +59,7 @@ chmod g+s $site_path
 
 # wp-config.php might not exist, ignore errors
 if [ -f wp-config.php ]; then
-  chown aegir.www-data wp-config.php
+  chown aegir:www-data wp-config.php
   chmod 0640 wp-config.php
 fi
 
@@ -86,7 +86,7 @@ if [ -d ../../wp-content/plugins/civicrm ]; then
 fi
 
 # Set the permissions
-# - owner by aegir.www-data (so that Aegir can backup/delete files)
+# - owner by aegir:www-data (so that Aegir can backup/delete files)
 # - www-data can write
 # - all directories are setgid to inherit group ownership
 chown -R aegir:www-data ./wp-content/*
