@@ -75,7 +75,7 @@ if (!defined('CIVICRM_UF_DSN') && CIVICRM_UF !== 'UnitTests') {
 }
 
 // Additional settings for {{ software }}
-{% if software == 'Drupal10' %}
+{% if software == 'Drupal10' or software == 'Drupal9' %}
 $civicrm_paths['civicrm.files']['url'] = 'https://{{ inventory_hostname }}/sites/{{ inventory_hostname }}/files/civicrm';
 $civicrm_paths['civicrm.files']['path'] = '{{ site_path }}/files/civicrm';
 $civicrm_paths['civicrm.private']['path'] = '{{ site_path }}/private/files/civicrm';
