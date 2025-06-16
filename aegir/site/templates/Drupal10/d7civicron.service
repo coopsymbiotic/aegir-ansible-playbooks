@@ -8,6 +8,6 @@ Wants=d7civicron_{{ site_shortname }}.timer
 [Service]
 User=www-data
 WorkingDirectory={{ site_path }}
-ExecStart=/usr/local/bin/aegir-getlock /usr/local/bin/cv api Job.execute --user={{ cron_user }}
+ExecStart=/usr/local/bin/aegir-getlock /usr/local/bin/cv cron{% if cron_user %} --user={{ cron_user }}{% endif %}
 # Improves CiviMail performance, otherwise the default hard limit is 1024
 LimitNOFILE=5120
