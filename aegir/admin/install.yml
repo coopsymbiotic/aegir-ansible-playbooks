@@ -15,6 +15,14 @@
       include_tasks: "install/debian.yml"
       tags: admin-install-debian
 
+    - name: Create symlink for aegir-ansible
+      file:
+        src: "/usr/local/aegir-ansible-playbooks/bin/aegir-ansible"
+        dest: "/usr/local/bin/aegir-ansible"
+        owner: root
+        group: root
+        state: link
+
     - name: Create the aegir user
       include_tasks: "install/user.yml"
 

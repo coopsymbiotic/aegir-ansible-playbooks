@@ -1,0 +1,6 @@
+---
+
+- name: Delete the platform directory
+  file:
+    path: "{{ publish_path }}"
+    state: absent

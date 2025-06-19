@@ -1,0 +1,23 @@
+---
+
+- hosts: all
+  tasks:
+    # Basic check for now, better than nothing
+    - name: Make sure the platform does not have any sites
+      find:
+        paths: "{{ publish_path }}/sites/"
+        patterns: '*.*.*'
+      register: emptyCheck
+
+    - fail:
+        msg: "The platform may have sites in it."
+      when: emptyCheck.matched != 0
+
+    - name: Run CMS-specific tasks
+      include_tasks: "delete/{{ software }}.yml"
+
+    - name: Update the platform status
+      shell:
+        chdir: "/var/aegir/admin/web"
+        cmd: "/usr/local/bin/bee hosting-platform-update-status --status=-2 {{ nid }}"
+

@@ -31,3 +31,11 @@
     creates: "{{ aegir_home }}/admin/modules/hosting"
   become: true
   become_user: "{{ aegir_user }}"
+
+- name: platform | Install the vbo module
+  shell:
+    chdir: "{{ aegir_home }}/admin/web/modules"
+    cmd: "bee dl views_bulk_operations"
+    creates: "{{ aegir_home }}/admin/modules/views_bulk_operations"
+  become: true
+  become_user: "{{ aegir_user }}"
