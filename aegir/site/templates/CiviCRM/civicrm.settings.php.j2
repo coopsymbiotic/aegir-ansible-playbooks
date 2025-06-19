@@ -208,23 +208,24 @@ if (!defined('CIVICRM_LOGGING_DSN')) {
  *      define('CIVICRM_TEMPLATE_COMPILEDIR', '/var/www/htdocs/wordpress/wp-content/uploads/civicrm/templates_c/');
  *
  */
+{# Use realpath to avoid double slashes, which can cause bugs with userFrameworkResourceURL or [civicrm.root] URLs #}
 {% if software == 'Drupal10' or software == 'Drupal9' %}
 $civicrm_root = '{{ (site_root + "/../vendor/civicrm/civicrm-core/") | realpath }}';
 if (!defined('CIVICRM_TEMPLATE_COMPILEDIR')) {
   define('CIVICRM_TEMPLATE_COMPILEDIR', '{{ site_path }}/private/files/civicrm/templates_c');
 }
 {% elif software == 'Drupal7' %}
-$civicrm_root = '{{ site_root }}/sites/all/modules/civicrm/';
+$civicrm_root = '{{ (site_root + "/sites/all/modules/civicrm/") | realpath }}';
 if (!defined('CIVICRM_TEMPLATE_COMPILEDIR')) {
   define('CIVICRM_TEMPLATE_COMPILEDIR', '{{ site_path }}/files/civicrm/templates_c');
 }
 {% elif software == 'Backdrop' %}
-$civicrm_root = '{{ site_root }}/modules/civicrm/';
+$civicrm_root = '{{ (site_root + "/sites/all/modules/civicrm/") | realpath }}';
 if (!defined('CIVICRM_TEMPLATE_COMPILEDIR')) {
   define('CIVICRM_TEMPLATE_COMPILEDIR', '{{ site_path }}/files/civicrm/templates_c');
 }
 {% elif software == 'WordPress' %}
-$civicrm_root = '{{ site_root }}/wp-content/plugins/civicrm/civicrm/';
+$civicrm_root = '{{ (site_root + "/wp-content/plugins/civicrm/civicrm/") | realpath }}';
 if (!defined('CIVICRM_TEMPLATE_COMPILEDIR')) {
   define('CIVICRM_TEMPLATE_COMPILEDIR', '{{ site_path }}/wp-content/uploads/civicrm/templates_c');
 }
