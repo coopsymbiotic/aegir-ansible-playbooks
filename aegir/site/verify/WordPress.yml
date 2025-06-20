@@ -50,7 +50,7 @@
   become_user: aegir
   shell:
     chdir: "{{ site_path }}"
-    cmd: "wp civicrm api Setting.create wpLoadPhp={{ site_root }}/wp-load.php"
+    cmd: cv api Setting.create wpLoadPhp={{ (site_root + "/wp-load.php") | realpath }}
   when: civicrm_is_active.stdout == "1"
 
 - name: WordPress | Update WP home option
