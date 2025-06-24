@@ -1,5 +1,7 @@
 ---
 
+# Note: localhost or 127.0.0.1 should not make a difference in newer Ansible versions
+
 - name: Create the MySQL database on remote server
   mysql_db:
     name: "{{ db_name }}"
@@ -7,14 +9,14 @@
     login_user: "{{ hostvars[db_host]['db']['db_user'] }}"
     login_password: "{{ hostvars[db_host]['db']['db_passwd'] }}"
     login_host: "{{ db_host }}"
-  when: db_host != "localhost"
+  when: db_host != "localhost" and db_host != "127.0.0.1"
 
 - name: Create the MySQL database on localhost
   mysql_db:
     name: "{{ db_name }}"
     state: present
     login_unix_socket: /var/run/mysqld/mysqld.sock
-  when: db_host == "localhost"
+  when: db_host == "localhost" or db_host == "127.0.0.1"
 
 - name: Create the MySQL user on remote server
   mysql_user:
@@ -27,7 +29,7 @@
     login_user: "{{ hostvars[db_host]['db']['db_user'] }}"
     login_password: "{{ hostvars[db_host]['db']['db_passwd'] }}"
     login_host: "{{ db_host }}"
-  when: db_host != "localhost"
+  when: db_host != "localhost" and db_host != "127.0.0.1"
 
 - name: Create the MySQL user on localhost
   mysql_user:
@@ -38,4 +40,4 @@
     column_case_sensitive: true
     state: present
     login_unix_socket: /var/run/mysqld/mysqld.sock
-  when: db_host == "localhost"
+  when: db_host == "localhost" or db_host == "127.0.0.1"
