@@ -1,0 +1,45 @@
+---
+
+- hosts: all
+  tasks:
+    - name: Change the source site directory permissions temporarily
+      file:
+        path: "{{ site_path }}"
+        state: directory
+        mode: 0750
+
+    # @todo FIXME If the the new_uri is the same as the site_path, we are migrating only the database
+    # @todo FIXME Implement database migration
+
+    # Using no_log here to reduce the warnings in the Ansible logs
+    - name: rsync the site to the new location
+      ansible.posix.synchronize:
+        src: "{{ site_path }}/"
+        dest: "{{ new_site_root }}/sites/{{ new_uri }}"
+        archive: true
+      no_log: true
+
+    # Has to be done before creating the MySQL user, so that we can store the new MySQL credentials
+    # This will set an "import" flag, which will then run the Import task (which will import the database.sql)
+    - name: Update the site in the Aegir inventory
+      shell:
+        chdir: "/var/aegir/admin/web"
+        cmd: "/usr/local/bin/bee hosting-site-migrate {{ nid }} {{ new_uri }} {{ target_platform }} {{ new_db_server }}"
+      register: result
+      # This is not working correctly
+      # failed_when: "'^\\d+' not in result.stdout"
+
+    - name: Delete the old letsencrypt cert
+      file:
+        path: "/var/aegir/config/letsencrypt.d/{{ inventory_hostname }}"
+        state: absent
+
+    - name: Delete the old drush site alias file
+      file:
+        path: "/var/aegir/.drush/{{ inventory_hostname }}.alias.drushrc.php"
+        state: absent
+
+    - name: Delete the old site directory
+      file:
+        path: "{{ site_path }}"
+        state: absent
