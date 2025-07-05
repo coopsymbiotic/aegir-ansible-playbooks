@@ -23,6 +23,7 @@
     login_user: "{{ hostvars[db_host]['db']['db_user'] }}"
     login_password: "{{ hostvars[db_host]['db']['db_passwd'] }}"
     login_host: "{{ db_host }}"
+    column_case_sensitive: false
   when: db_host != "localhost" and db_host != "127.0.0.1"
 
 - name: Delete the MySQL user on localhost
@@ -30,4 +31,5 @@
     name: "{{ db_name }}"
     state: absent
     login_unix_socket: /var/run/mysqld/mysqld.sock
+    column_case_sensitive: false
   when: db_host == "localhost" or db_host == "127.0.0.1"
