@@ -71,4 +71,4 @@ mkdir -p ../../../private/$url/log
 chown -R aegir:www-data ../../../private/$url
 find ../../../private/$url -type d -exec chmod 0775 {} \;
 find ../../../private/$url -type f ! -name civicrm.settings.php -exec chmod 0664 {} \;
-chmod 0640 ../../../private/civicrm.settings.php
+chmod 0640 ../../../private/$url/civicrm.settings.php
