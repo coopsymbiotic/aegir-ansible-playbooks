@@ -4,6 +4,8 @@
   shell: hostname -f
   register: hostname
 
+- include_tasks: "{{ playbook_dir }}/../server/verify/nginx.yml"
+
 # Duplicates a lot from aegir/site/verify.yml
 - name: Check if the http cert already exists
   stat:

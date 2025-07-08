@@ -1,0 +1,36 @@
+---
+
+# nb: this is also included from 'aegir/admin/install/vhost.yml'
+# hence the templates directory is under here too
+
+# This was previously under /var/aegir/config/nginx.conf
+# but we are trying to be a bit more standard and eventually phase out /var/aegir/conf
+- name: Deploy our nginx aegir.conf
+  template:
+    src: etc/nginx/conf.d/aegir.conf
+    dest: /etc/nginx/conf.d/aegir.conf
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Create the server_master vhost.d directory
+  file:
+    path: "/var/aegir/config/server_master/nginx/vhost.d/"
+    state: directory
+    owner: root
+    group: root
+
+- name: Create the includes directory
+  file:
+    path: "/var/aegir/config/includes/"
+    state: directory
+    owner: root
+    group: root
+
+- name: Deploy nginx_vhost_common.conf
+  template:
+    src: nginx_vhost_common.conf.j2
+    dest: /var/aegir/config/includes/nginx_vhost_common.conf
+    owner: root
+    group: root
+    mode: 0644
