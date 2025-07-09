@@ -1166,7 +1166,6 @@ location = /index.php {
   fastcgi_cache_bypass $cookie_NoCacheID $http_authorization $nocache;
   fastcgi_cache_use_stale error http_500 http_503 invalid_header timeout updating;
 }
-<?php endif; ?>
 
 ###
 ### Send other known php requests/files to php-fpm without any caching.
