@@ -5,7 +5,7 @@
   become_user: aegir
   shell:
     chdir: "{{ site_path }}"
-    cmd: "drush site-install {{ profile }} --db-url=mysql://{{ db_name }}:{{ db_passwd }}@{{ db_host }}:{{ db_port }}/{{ db_name}} --site-name={{ inventory_hostname }} --sites-subdir={{ inventory_hostname }} --site-mail=fixme@example.org --locale=en"
+    cmd: "drush site-install {{ profile }} --db-url=mysql://{{ db_name }}:{{ db_passwd }}@{{ db_host }}:{{ db_port }}/{{ db_name}} --site-name={{ inventory_hostname }} --sites-subdir={{ inventory_hostname }} --site-mail=fixme@example.org --locale={{ language[:2] }}"
     creates: "{{ site_path }}/settings.php"
 
 - name: Change the site directory permissions temporarily
@@ -19,11 +19,10 @@
     path: "{{ site_root }}/../vendor/civicrm/civicrm-core/xml/version.xml"
   register: civicheck
 
-# FIXME @todo language
 - name: Install CiviCRM
   shell:
     chdir: "{{ site_path }}"
-    cmd: "cv core:install --cms-base-url=https://{{ inventory_hostname }}/ --lang=en_US"
+    cmd: "cv core:install --cms-base-url=https://{{ inventory_hostname }}/ --lang={{ language }}"
     creates: "{{ site_path }}/civicrm.settings.php"
 
 - name: Change the site directory permissions back to normal

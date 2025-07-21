@@ -19,11 +19,10 @@
     path: "{{ site_root }}/../vendor/civicrm/civicrm-core/xml/version.xml"
   register: civicheck
 
-# FIXME @todo language
 - name: Install CiviCRM
   shell:
     chdir: "{{ site_path }}"
-    cmd: "cv core:install --cms-base-url=https://{{ inventory_hostname }}/ --lang=en_US"
+    cmd: "cv core:install --cms-base-url=https://{{ inventory_hostname }}/ --lang={{ language }}"
     creates: "{{ site_path }}/civicrm.settings.php"
 
 - name: Change the site directory permissions back to normal
