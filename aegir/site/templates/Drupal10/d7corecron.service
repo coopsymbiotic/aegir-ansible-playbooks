@@ -1,4 +1,4 @@
-# {{ ansible_managed }}
+# {{ aegir_managed }}
 [Unit]
 Description="D10-Core Cron for {{ inventory_hostname }}"
 Documentation="https://github.com/coopsymbiotic/aegir-ansible-playbooks.git"

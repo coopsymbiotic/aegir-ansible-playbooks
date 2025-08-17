@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# {{ ansible_managed }}
+# {{ aegir_managed }}
 
 # Help menu
 print_help() {

@@ -1,4 +1,4 @@
-# {{ ansible_managed }}
+# {{ aegir_managed }}
 {% for item in groups['sites'] %}
 {% if hostvars[item]['site_status'] == 1 %}
 {{ item }}{% if hostvars[item]['aliases']|length > 0 %} {{ hostvars[item]['aliases'] | join(' ') }}{% endif +%}

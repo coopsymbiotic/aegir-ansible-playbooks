@@ -1,4 +1,4 @@
-# {{ ansible_managed }}
+# {{ aegir_managed }}
 [Unit]
 Description="D7-CiviCRM Cron for {{ inventory_hostname }}"
 Requires=d7civicron_{{ site_shortname }}.service

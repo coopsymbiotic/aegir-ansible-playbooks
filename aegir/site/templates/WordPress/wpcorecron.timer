@@ -1,4 +1,4 @@
-# {{ ansible_managed }}
+# {{ aegir_managed }}
 
 [Unit]
 Description="WP-Core Cron for {{ inventory_hostname }}"

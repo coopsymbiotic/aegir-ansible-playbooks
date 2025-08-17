@@ -1,4 +1,4 @@
-# {{ ansible_managed }}
+# {{ aegir_managed }}
 
 [Unit]
 Description="WP-CiviCRM Cron for {{ inventory_hostname }}"
