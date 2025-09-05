@@ -123,6 +123,6 @@
     - cron-cms
 
 - include_tasks: WordPress/cms-cron-remove.yml
-  when: cms_cron_interval is undefined or cms_cron_interval = "-1" or cms_cron_interval = "0"
+  when: cms_cron_interval is undefined or cms_cron_interval == "-1" or cms_cron_interval == "0"
   tags:
     - cron-cms
