@@ -14,6 +14,12 @@
         path: "/etc/nginx/params.4096"
       register: dhparams
 
+    # Symbiotic uses this to centralise the TLS confs in one place
+    - name: Check if the snippets/ciphers.conf file exists
+      stat:
+        path: "/etc/nginx/params.4096"
+      register: ciphers
+
     - name: Create the nginx vhost
       template:
         src: "vhost-nginx.conf"
