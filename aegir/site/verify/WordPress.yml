@@ -118,5 +118,11 @@
     - cron-civicrm
 
 - include_tasks: WordPress/cms-cron.yml
+  when: cms_cron_interval is defined and cms_cron_interval != "-1" and cms_cron_interval != "0"
+  tags:
+    - cron-cms
+
+- include_tasks: WordPress/cms-cron-remove.yml
+  when: cms_cron_interval is undefined or cms_cron_interval == "-1" or cms_cron_interval == "0"
   tags:
     - cron-cms
