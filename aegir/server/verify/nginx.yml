@@ -7,11 +7,14 @@
 # but we are trying to be a bit more standard and eventually phase out /var/aegir/conf
 - name: Deploy our nginx aegir.conf
   template:
-    src: etc/nginx/conf.d/aegir.conf
-    dest: /etc/nginx/conf.d/aegir.conf
-    owner: root
-    group: root
-    mode: 0644
+    src: "etc/nginx/conf.d/{{ item }}"
+    dest: "/etc/nginx/conf.d/{{ item }}"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+  with_items:
+    - aegir.conf
+    - z-aegir.conf
 
 - name: Create the server_master vhost.d directory
   file:
@@ -33,4 +36,4 @@
     dest: /var/aegir/config/includes/nginx_vhost_common.conf
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
