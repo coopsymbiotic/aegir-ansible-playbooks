@@ -10,6 +10,7 @@
     aegir_db_host: localhost
     aegir_admin_email: fixme@example.org
     bee_version: 1.x-1.1.0
+    aegir_managed: "Managed by Aegir"
   tasks:
     - name: Install base OS dependencies
       include_tasks: "install/debian.yml"
