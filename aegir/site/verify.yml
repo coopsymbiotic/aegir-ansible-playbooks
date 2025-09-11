@@ -17,7 +17,7 @@
     # Symbiotic uses this to centralise the TLS confs in one place
     - name: Check if the snippets/ciphers.conf file exists
       stat:
-        path: "/etc/nginx/params.4096"
+        path: "/etc/nginx/snippets/ciphers.conf"
       register: ciphers
 
     - name: Create the nginx vhost
