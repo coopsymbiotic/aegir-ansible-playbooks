@@ -30,10 +30,14 @@
     owner: root
     group: root
 
-- name: Deploy nginx_vhost_common.conf
+- name: Deploy our nginx vhost includes
   template:
-    src: nginx_vhost_common.conf.j2
-    dest: /var/aegir/config/includes/nginx_vhost_common.conf
-    owner: root
-    group: root
+    src: "{{ item }}.j2"
+    dest: "/var/aegir/config/includes/{{ item }}"
+    owner: "root"
+    group: "root"
     mode: "0644"
+  with_items:
+    - nginx_vhost_common.conf
+    - nginx_vhost_aegir.conf
+    - nginx_vhost_robotstxt.conf

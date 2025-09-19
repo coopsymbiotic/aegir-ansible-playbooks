@@ -1,0 +1,13 @@
+###
+### Support for https://drupal.org/project/robotstxt module
+### and static file in the sites/domain/files directory.
+### (this is not included by dev sites)
+###
+location = /robots.txt {
+  access_log    off;
+  log_not_found off;
+  add_header Access-Control-Allow-Origin *;
+  add_header X-Content-Type-Options nosniff;
+  add_header X-XSS-Protection "1; mode=block";
+  try_files /sites/$main_site_name/files/$host.robots.txt /sites/$main_site_name/files/robots.txt /sites/$main_site_name/wp-content/$host.robots.txt /sites/$main_site_name/wp-content/robots.txt $uri @cache;
+}

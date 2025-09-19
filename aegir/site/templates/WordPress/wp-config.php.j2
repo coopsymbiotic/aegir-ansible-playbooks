@@ -1,7 +1,12 @@
 <?php
 
+// Old naming
 if (is_readable("{{ site_path }}/local.wp-config.php")) {
   require_once "{{ site_path }}/local.wp-config.php";
+}
+// New name
+if (is_readable("{{ site_path }}/wp-config.pre.php")) {
+  require_once "{{ site_path }}/wp-config.pre.php";
 }
 
 if (!defined('DB_NAME')) {
