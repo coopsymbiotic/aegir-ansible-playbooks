@@ -8,11 +8,15 @@
     group: root
     mode: 0644
 
+# Ignoring errors because sometimes it might be for a cert unrelated to
+# the site being verified, and in any case, the other verify tasks are
+# still probably relevant.
 - name: Generate an https certificate
   shell:
     chdir: "/var/aegir"
     cmd: "dehydrated --accept-terms --cron --keep-going"
   register: certlog
+  ignore_errors: true
 
 # Always display the output, often requires debugging
 - debug: var=certlog.stdout_lines
