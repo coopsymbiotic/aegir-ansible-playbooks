@@ -1,0 +1,8 @@
+# Never cache Aegir pages
+location ^~ /hosting {
+  if ($is_bot) {
+    return 403;
+  }
+  set $nocache_details "Skip";
+  try_files $uri @drupal;
+}

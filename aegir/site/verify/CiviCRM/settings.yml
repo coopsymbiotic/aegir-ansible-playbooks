@@ -1,13 +1,5 @@
 ---
 
-- name: Update the drushrc.php file for the site
-  template:
-    src: "site.drushrc.php.j2"
-    dest: "{{ site_path }}/drushrc.php"
-    owner: aegir
-    group: www-data
-    mode: 0440
-
 - name: Make sure the site private directory exists
   file:
     path: "{{ site_root }}/../private/{{ inventory_hostname }}"

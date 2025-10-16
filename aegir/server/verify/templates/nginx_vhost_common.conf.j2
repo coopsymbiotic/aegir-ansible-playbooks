@@ -150,19 +150,6 @@ location = /favicon.ico {
 }
 
 ###
-### Support for https://drupal.org/project/robotstxt module
-### and static file in the sites/domain/files directory.
-###
-location = /robots.txt {
-  access_log    off;
-  log_not_found off;
-  add_header Access-Control-Allow-Origin *;
-  add_header X-Content-Type-Options nosniff;
-  add_header X-XSS-Protection "1; mode=block";
-  try_files /sites/$main_site_name/files/$host.robots.txt /sites/$main_site_name/files/robots.txt /sites/$main_site_name/wp-content/$host.robots.txt /sites/$main_site_name/wp-content/robots.txt $uri @cache;
-}
-
-###
 ### Support for static ads.txt file in the sites/domain/files directory.
 ###
 location = /ads.txt {
@@ -227,30 +214,6 @@ location ^~ /search {
 }
 
 ###
-### Fix for #2005116
-###
-location ^~ /hosting/sites {
-  if ( $is_bot ) {
-    return 403;
-  }
-  access_log off;
-  set $nocache_details "Skip";
-  try_files $uri @drupal;
-}
-
-###
-### Fix for Aegir & .info .pl domain extensions.
-###
-location ^~ /hosting {
-  if ( $is_bot ) {
-    return 403;
-  }
-  access_log off;
-  set $nocache_details "Skip";
-  try_files $uri @drupal;
-}
-
-###
 ### Support for backup_migrate module download/restore/delete actions.
 ###
 location ^~ /admin {
@@ -312,9 +275,6 @@ location ~* ^/\w\w/cs {
   set $nocache_details "Skip";
   try_files $uri @drupal;
 }
-
-### SYMBIOTIC - Workaround for drush bug and CiviCRM Spark signups
-rewrite ^/usr/local/bin/user/reset/(.*)$ /user/reset/$1 redirect;
 
 ###
 ### Support for audio module.
