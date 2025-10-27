@@ -35,7 +35,7 @@
 # Make sure that the upload directory exists, so that "fix-permissions" runs correctly
 - name: Make sure that the upload directory exists
   file:
-    path: "{{ site_root }}/upload"
+    path: "{{ site_root }}/sites/{{ inventory_hostname }}/upload"
     state: directory
     owner: "aegir"
     group: "www-data"
