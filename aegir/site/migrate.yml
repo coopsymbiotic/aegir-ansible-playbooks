@@ -43,3 +43,8 @@
       file:
         path: "{{ site_path }}"
         state: absent
+
+    - name: Run provision-verify
+      shell:
+        chdir: "/var/aegir/admin/web"
+        cmd: "/usr/local/bin/bee hosting-site-task {{ new_uri }} verify"
