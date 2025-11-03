@@ -1,5 +1,11 @@
 ---
 
+- name: Change the site directory permissions temporarily
+  file:
+    path: "{{ site_path }}"
+    state: directory
+    mode: 0750
+
 - name: Install Drupal 7
   become: true
   become_user: aegir
@@ -7,3 +13,36 @@
     chdir: "{{ site_path }}"
     cmd: "drush -y site-install {{ profile }} --db-url=mysql://{{ db_name }}:{{ db_passwd }}@{{ db_host }}:{{ db_port }}/{{ db_name}} --site-name={{ inventory_hostname }} --sites-subdir={{ inventory_hostname }} --site-mail=fixme@example.org --locale={{ language[:2] }}"
     creates: "{{ site_path }}/settings.php"
+
+- name: Make sure that the files directory exists
+  file:
+    path: "{{ site_root }}/sites/{{ inventory_hostname }}/files"
+    state: directory
+    owner: "aegir"
+    group: "www-data"
+    mode: "0770"
+
+- name: Make sure that the private directory exists
+  file:
+    path: "{{ site_root }}/sites/{{ inventory_hostname }}/private"
+    state: directory
+    owner: "aegir"
+    group: "www-data"
+    mode: "0770"
+
+- name: Check if the platform has CiviCRM
+  stat:
+    path: "{{ site_root }}/sites/all/modules/civicrm/xml/version.xml"
+  register: civicheck
+
+- name: Install CiviCRM
+  shell:
+    chdir: "{{ site_path }}"
+    cmd: "cv core:install --cms-base-url=https://{{ inventory_hostname }}/ --lang={{ language }}"
+    creates: "{{ site_path }}/civicrm.settings.php"
+
+- name: Change the site directory permissions back to normal
+  file:
+    path: "{{ site_path }}"
+    state: directory
+    mode: 0550
