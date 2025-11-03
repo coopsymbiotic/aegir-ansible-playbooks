@@ -25,6 +25,8 @@
 
      - name: Run the post-import command
        shell:
+         environment:
+           AEGIR_SITE_ENVIRONMENT: "{{ site_environment }}"
          cmd: "{{ hostvars[platform_name]['site_post_import_cmd'] }}"
          chdir: "{{ site_path }}"
        when: hostvars[platform_name]['site_post_import_cmd'] | length > 0

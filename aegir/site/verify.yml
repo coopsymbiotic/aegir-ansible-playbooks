@@ -72,6 +72,8 @@
 
     - name: Run the post-verify command
       shell:
+        environment:
+          AEGIR_SITE_ENVIRONMENT: "{{ site_environment }}"
         cmd: "{{ hostvars[platform_name]['site_post_verify_cmd'] }}"
         chdir: "{{ site_path }}"
       when: hostvars[platform_name]['site_post_verify_cmd'] | length > 0
