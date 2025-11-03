@@ -31,6 +31,3 @@
 # flags the old service as failed
 - name: Systemd reset-failed
   ansible.builtin.command: systemctl reset-failed
-  args:
-    # Suppress the warning about using the command module for systemctl
-    warn: false
