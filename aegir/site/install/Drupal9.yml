@@ -24,11 +24,15 @@
 
 - name: Make sure that the private directory exists
   file:
-    path: "{{ site_root }}/sites/{{ inventory_hostname }}/private"
+    path: "{{ site_root }}/sites/{{ inventory_hostname }}/{{ item }}"
     state: directory
     owner: "aegir"
     group: "www-data"
     mode: "0770"
+  with:
+    - "private"
+    - "private/temp"
+    - "private/files"
 
 - name: Check if the platform has CiviCRM
   stat:
