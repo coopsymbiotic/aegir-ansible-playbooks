@@ -29,6 +29,9 @@
       # This is not working correctly
       # failed_when: "'^\\d+' not in result.stdout"
 
+    - name: Run CMS-specific tasks
+      include_tasks: "migrate/{{ software }}.yml"
+
     - name: Delete the old letsencrypt cert
       file:
         path: "/var/aegir/config/letsencrypt.d/{{ inventory_hostname }}"
