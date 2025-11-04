@@ -29,7 +29,7 @@
     owner: "aegir"
     group: "www-data"
     mode: "0770"
-  with:
+  with_items:
     - "private"
     - "private/temp"
     - "private/files"
