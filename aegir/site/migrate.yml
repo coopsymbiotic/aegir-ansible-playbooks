@@ -32,6 +32,11 @@
     - name: Run CMS-specific tasks
       include_tasks: "migrate/{{ software }}.yml"
 
+    - name: Delete the nginx vhost
+      file:
+        path: "/var/aegir/config/server_master/nginx/vhost.d/{{ inventory_hostname }}"
+        state: absent
+
     - name: Delete the old letsencrypt cert
       file:
         path: "/var/aegir/config/letsencrypt.d/{{ inventory_hostname }}"
