@@ -11,6 +11,7 @@
     - "wpcorecron_{{ site_shortname }}.service"
     - "wpcivicron_{{ site_shortname }}.service"
   when: cms_cron_interval is defined and cms_cron_interval|int > 0
+  ignore_errors: yes
 
 - name: Delete the old timers/crons
   file:
