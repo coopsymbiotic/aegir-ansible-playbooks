@@ -1,0 +1,29 @@
+#!/bin/bash
+
+# {{ ansible_managed }}
+
+# Does a git pull on all Aegir platforms (while keeping the current branch)
+# The objective is to have stable branches that receive regular backports
+# of bugfixes, minor improvements or security fixes.
+#
+# This script must be run as the aegir user, or whatever owner of the git files
+#
+# @todo Run database upgrades if necessary
+
+PLATFORMS_ROOT="/var/aegir/platforms"
+echo "Checking direct subdirectories of: $PLATFORMS_ROOT"
+
+for dir in "$PLATFORMS_ROOT"/*/; do
+    # Skip if not a directory
+    [ -d "$dir" ] || continue
+
+    # Check if it's a git repo
+    if [ -d "$dir/.git" ]; then
+        (
+            cd "$dir" || (echo "Could not access $dir" && exit)
+            branch=$(git rev-parse --abbrev-ref HEAD)
+            echo "Updating: $dir (branch $branch)"
+            git pull
+        )
+    fi
+done
