@@ -1,0 +1,34 @@
+---
+
+- name: Stop and disable the CiviCRM and CMS cron services
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    state: stopped
+    enabled: false
+  with_items:
+    - "d7corecron_{{ site_shortname }}.timer"
+    - "d7civicron_{{ site_shortname }}.timer"
+    - "d7corecron_{{ site_shortname }}.service"
+    - "d7civicron_{{ site_shortname }}.service"
+  when: cms_cron_interval is defined and cms_cron_interval|int > 0
+  ignore_errors: yes
+
+- name: Delete the old timers/crons
+  file:
+    path: "/etc/systemd/system/{{ item }}"
+    state: absent
+  with_items:
+    - "d7corecron_{{ site_shortname }}.service"
+    - "d7corecron_{{ site_shortname }}.timer"
+    - "d7civicron_{{ site_shortname }}.service"
+    - "d7civicron_{{ site_shortname }}.timer"
+
+- name: Systemd reload
+  ansible.builtin.systemd_service:
+    daemon_reload: true
+
+# In theory this should not be necessary, but it seems that regardless of
+# the order in which services are disabled/removed, systemd is unhappy and
+# flags the old service as failed
+- name: Systemd reset-failed
+  ansible.builtin.command: systemctl reset-failed

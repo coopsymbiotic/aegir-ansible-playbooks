@@ -24,6 +24,8 @@
        when: not sqldump.stat.exists
 
      - name: Run the post-import command
+       environment:
+         AEGIR_SITE_ENVIRONMENT: "{{ site_environment }}"
        shell:
          cmd: "{{ hostvars[platform_name]['site_post_import_cmd'] }}"
          chdir: "{{ site_path }}"

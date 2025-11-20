@@ -71,6 +71,8 @@
       include_tasks: "verify/{{ software }}.yml"
 
     - name: Run the post-verify command
+      environment:
+        AEGIR_SITE_ENVIRONMENT: "{{ site_environment }}"
       shell:
         cmd: "{{ hostvars[platform_name]['site_post_verify_cmd'] }}"
         chdir: "{{ site_path }}"

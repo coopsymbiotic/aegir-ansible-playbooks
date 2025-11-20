@@ -4,8 +4,9 @@
   file:
     path: "{{ site_root }}/../private/{{ inventory_hostname }}"
     state: directory
-    owner: aegir
-    group: www-data
+    owner: "aegir"
+    group: "www-data"
+    mode: "0770"
 
 # @todo --lang=xx_YY
 # @todo https://github.com/civicrm/cv/issues/183
@@ -30,6 +31,15 @@
     - cache
     - civicrm.settings.php
     - log
+
+# Make sure that the upload directory exists, so that "fix-permissions" runs correctly
+- name: Make sure that the upload directory exists
+  file:
+    path: "{{ site_root }}/sites/{{ inventory_hostname }}/upload"
+    state: directory
+    owner: "aegir"
+    group: "www-data"
+    mode: "0770"
 
 # No need to run verify, since when the site status is set to enabled, Verify will run
 # Run the verify tasks, which will update the civicrm.settings.php

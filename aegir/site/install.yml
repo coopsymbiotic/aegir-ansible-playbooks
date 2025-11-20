@@ -17,6 +17,8 @@
       include_tasks: "install/{{ software }}.yml"
 
     - name: Run the post-install command
+      environment:
+        AEGIR_SITE_ENVIRONMENT: "{{ site_environment }}"
       shell:
         cmd: "{{ hostvars[platform_name]['site_post_install_cmd'] }}"
         chdir: "{{ site_path }}"
