@@ -15,7 +15,7 @@
         group: "root"
         state: "link"
       with_items:
-        - cv
+        - cvlog
 
 # todo:
 # - validate MySQL credentials
