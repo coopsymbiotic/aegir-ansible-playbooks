@@ -5,5 +5,15 @@
     - name: Run CMS-specific tasks
       include_tasks: "verify/nginx.yml"
 
+    - name: Create symlinks for Aegir helper scripts
+      file:
+        src: "/usr/local/aegir-ansible-playbooks/bin/{{ item }}"
+        dest: "/usr/local/bin/{{ item }}"
+        owner: root
+        group: root
+        state: link
+      with_items:
+        - cv
+
 # todo:
 # - validate MySQL credentials
