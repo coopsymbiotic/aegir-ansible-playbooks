@@ -6,7 +6,7 @@
 # This was previously under /var/aegir/config/nginx.conf
 # but we are trying to be a bit more standard and eventually phase out /var/aegir/conf
 - name: Deploy our nginx aegir.conf
-  template:
+  ansible.builtin.template:
     src: "etc/nginx/conf.d/{{ item }}"
     dest: "/etc/nginx/conf.d/{{ item }}"
     owner: "root"
@@ -17,21 +17,23 @@
     - z-aegir.conf
 
 - name: Create the server_master vhost.d directory
-  file:
+  ansible.builtin.file:
     path: "/var/aegir/config/server_master/nginx/vhost.d/"
     state: directory
     owner: root
     group: root
+    mode: "0755"
 
 - name: Create the includes directory
-  file:
+  ansible.builtin.file:
     path: "/var/aegir/config/includes/"
     state: directory
     owner: root
     group: root
+    mode: "0755"
 
 - name: Deploy our nginx vhost includes
-  template:
+  ansible.builtin.template:
     src: "{{ item }}.j2"
     dest: "/var/aegir/config/includes/{{ item }}"
     owner: "root"

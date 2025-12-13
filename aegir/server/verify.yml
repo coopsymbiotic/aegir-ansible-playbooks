@@ -1,17 +1,19 @@
 ---
 
-- hosts: all
+- name: "Server verify"
+  hosts: all
   tasks:
     - name: Run CMS-specific tasks
-      include_tasks: "verify/nginx.yml"
+      ansible.builtin.include_tasks: "verify/nginx.yml"
 
     - name: Create symlinks for Aegir helper scripts
-      file:
+      ansible.builtin.file:
         src: "/usr/local/aegir-ansible-playbooks/bin/{{ item }}"
         dest: "/usr/local/bin/{{ item }}"
-        owner: root
-        group: root
-        state: link
+        force: true
+        owner: "root"
+        group: "root"
+        state: "link"
       with_items:
         - cv
 
