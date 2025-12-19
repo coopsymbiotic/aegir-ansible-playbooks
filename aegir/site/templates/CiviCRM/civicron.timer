@@ -1,0 +1,13 @@
+# {{ aegir_managed }}
+[Unit]
+Description="Standalone-CiviCRM Cron for {{ inventory_hostname }}"
+Requires=civicron_{{ site_shortname }}.service
+
+[Timer]
+Unit=civicron_{{ site_shortname }}.service
+OnUnitInactiveSec={{ civicrm_ansible_cron_interval }}sec
+OnBootSec=10min
+RandomizedDelaySec=30sec
+
+[Install]
+WantedBy=timers.target
