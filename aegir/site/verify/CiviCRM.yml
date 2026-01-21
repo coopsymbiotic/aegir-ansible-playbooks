@@ -8,3 +8,8 @@
     cmd: "/usr/local/aegir-ansible-playbooks/bin/fix-standalone-permissions.sh --site-path='{{ site_path }}'"
   tags:
     - civicrm-fixpermissions
+
+- include_tasks: CiviCRM/civicrm-cron.yml
+  when: "'civicrm_sites' in group_names"
+  tags:
+    - cron-civicrm
