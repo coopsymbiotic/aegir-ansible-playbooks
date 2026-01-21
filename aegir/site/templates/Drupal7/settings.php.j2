@@ -967,3 +967,8 @@ $conf['admin_menu_cache_client'] = FALSE;
  * Set the Syslog identity to the site name so it's not always "drupal"
  */
 $conf['syslog_identity'] = '{{ inventory_hostname }}';
+
+# Additional site configuration settings.
+if (is_readable('{{ site_path }}/local.settings.php')) {
+  include('{{ site_path }}/local.settings.php');
+}
