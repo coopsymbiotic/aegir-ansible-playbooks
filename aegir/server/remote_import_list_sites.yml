@@ -1,0 +1,11 @@
+---
+
+- name: "Remote import list sites"
+  hosts: all
+  tasks:
+    - name: test
+      ansible.builtin.command: "ssh aegir@{{ inventory_hostname }} curl https://{{ inventory_hostname }}/inventory"
+      become: true
+      become_user: aegir
+
+# TODO: maybe send through jq to get only the sites, not any extra details?
