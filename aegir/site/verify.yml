@@ -30,6 +30,19 @@
       notify:
         - reload nginx
 
+    # Sites should always redirect, but we do have exceptions when we need it.
+    - name: Create the nginx vhosts for non-redirecting site aliases
+      template:
+        src: "vhost-nginx-alias.conf"
+        dest: "/var/aegir/config/server_master/nginx/vhost.d/{{ item }}"
+        owner: root
+        group: root
+        mode: 0644
+      loop: "{{ aliases }}"
+      when: aliases_redirection
+      notify:
+        - reload nginx
+
     - name: Force the nginx reload to happen now so that the well-known route works
       meta: flush_handlers
 
