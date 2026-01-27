@@ -3,9 +3,13 @@
 - name: "Remote import list sites"
   hosts: all
   tasks:
-    - name: test
-      ansible.builtin.command: "ssh aegir@{{ inventory_hostname }} curl https://{{ inventory_hostname }}/inventory"
+    - name: Get a list of remote hosts
+      ansible.builtin.command: "ssh aegir@{{ inventory_hostname }} 'curl https://{{ inventory_hostname }}/inventory | jq .sites.hosts'"
       become: true
       become_user: aegir
+      register: list_hosts
 
-# TODO: maybe send through jq to get only the sites, not any extra details?
+    - name: Store the data in the database
+      shell:
+        chdir: "/var/aegir/admin/web"
+        cmd: "/usr/local/bin/bee hosting-remote-import-sitelist {{ task }} '{{ list_hosts.stdout }}'"
