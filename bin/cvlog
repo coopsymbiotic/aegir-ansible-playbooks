@@ -86,7 +86,7 @@ cd "$LOGPATH"
 
 # Resolve command
 case $OP in
-  help)
+  help | h | -help)
     echo "usage: $SCRIPTNAME [COMMAND] [SITE NAME]"
     echo
     echo "View the most recent CiviCRM log file located under the ConfigAndLog folder."
@@ -95,6 +95,8 @@ case $OP in
     echo "  ls     List all log files present in the ConfigAndLog folder"
     echo "  cd     Go to the ConfigAndLog folder (opens a new bash shell)"
     echo "  pwd    Display the location of the ConfigAndLog folder"
+    echo "  edit   Edit the latest log file in vim (alias: e)"
+    echo "  tail   Tail the latest log file (default, alias: t)"
     echo "  help   Show this message"
     echo
     echo "Environment variables"
@@ -122,6 +124,9 @@ case $OP in
   edit | e)
     VIEWER="vim"
     # continue to the next condition
+    ;;&
+  tail | t)
+    # do nothing, continue
     ;;&
   * )
     # Find the most recent log
