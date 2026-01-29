@@ -63,9 +63,9 @@ if [ -d "$ROOT/$PLATFORM/private/$SITENAME/log" ]; then
 elif [ -d "$ROOT/$PLATFORM/sites/$SITENAME/wp-content/uploads/civicrm/ConfigAndLog" ]; then
   # Wordpress site
   LOGPATH="$ROOT/$PLATFORM/site/$SITENAME/wp-content/uploads/civicrm/ConfigAndLog"
-elif [ -d "$ROOT/$PLATFORM/web/sites/$SITENAME/private/files/ConfigAndLog" ]; then
+elif [ -d "$ROOT/$PLATFORM/web/sites/$SITENAME/private/files/civicrm/ConfigAndLog" ]; then
   # Drupal10+
-  LOGPATH="$ROOT/$PLATFORM/web/sites/$SITENAME/private/files/ConfigAndLog"
+  LOGPATH="$ROOT/$PLATFORM/web/sites/$SITENAME/private/files/civicrm/ConfigAndLog"
 elif [ -d "$ROOT/$PLATFORM/sites/$SITENAME/private/files/civicrm/ConfigAndLog" ]; then
   # Drupal7
   LOGPATH="$ROOT/$PLATFORM/sites/$SITENAME/private/files/civicrm/ConfigAndLog"
