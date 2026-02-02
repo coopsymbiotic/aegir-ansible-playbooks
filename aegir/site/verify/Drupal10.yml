@@ -11,10 +11,24 @@
 
 # @todo Remove the cron if the CiviCRM plugin is disabled
 - include_tasks: Drupal10/civicrm-cron.yml
-  when: "'civicrm_sites' in group_names"
+  when:
+    - "'civicrm_sites' in group_names"
+    - civicrm_ansible_cron_interval is defined
+    - civicrm_ansible_cron_interval|int > 0
+  tags:
+    - cron-civicrm
+
+- include_tasks: Drupal10/civicrm-cron-remove.yml
+  when: civicrm_ansible_cron_interval is undefined or civicrm_ansible_cron_interval|int <= 0
   tags:
     - cron-civicrm
 
 - include_tasks: Drupal10/cms-cron.yml
+  when: cms_cron_interval is defined and cms_cron_interval|int > 0
+  tags:
+    - cron-cms
+
+- include_tasks: Drupal10/cms-cron-remove.yml
+  when: cms_cron_interval is undefined or cms_cron_interval|int <= 0
   tags:
     - cron-cms
