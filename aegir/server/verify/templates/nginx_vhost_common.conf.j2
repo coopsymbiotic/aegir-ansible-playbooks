@@ -229,18 +229,31 @@ location ^~ /admin {
 ### CiviCRM
 ###
 ### SYMBIOTIC - Always cache Mosaico images (and multilingual)
+### and ignore cookies (which is a bug that sometimes happens on WordPress)
 location ^~ /civicrm/mosaico/img {
+  set $nocache_details "Cache";
+  set $cookie_NoCacheID "";
+  set $cache_uid "";
   try_files $uri @drupal;
 }
 location ~* ^/\w\w/civicrm/mosaico/img {
+  set $nocache_details "Cache";
+  set $cookie_NoCacheID "";
+  set $cache_uid "";
   try_files $uri @drupal;
 }
 ### SYMBIOTIC - Always cache Contact Images (and multilingual)
 # This is mostly for images exposed by SearchKit
 location ^~ /civicrm/contact/imagefile {
+  set $nocache_details "Cache";
+  set $cookie_NoCacheID "";
+  set $cache_uid "";
   try_files $uri @drupal;
 }
 location ~* ^/\w\w/civicrm/contact/imagefile {
+  set $nocache_details "Cache";
+  set $cookie_NoCacheID "";
+  set $cache_uid "";
   try_files $uri @drupal;
 }
 
