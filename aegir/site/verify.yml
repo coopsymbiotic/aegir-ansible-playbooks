@@ -43,6 +43,15 @@
       notify:
         - reload nginx
 
+    - name: Make sure there are no lingering vhosts from aliases if we now redirect but previously did not
+      file:
+        path: "/var/aegir/config/server_master/nginx/vhost.d/{{ item }}"
+        state: absent
+      loop: "{{ aliases }}"
+      when: aliases_redirection != "0"
+      notify:
+        - reload nginx
+
     - name: Force the nginx reload to happen now so that the well-known route works
       meta: flush_handlers
 
