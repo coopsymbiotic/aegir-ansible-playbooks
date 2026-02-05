@@ -39,7 +39,7 @@
         group: root
         mode: 0644
       loop: "{{ aliases }}"
-      when: aliases_redirection
+      when: aliases_redirection == "0"
       notify:
         - reload nginx
 
