@@ -45,3 +45,11 @@
     mode: 0644
   notify:
     - reload nginx
+
+- name: Generate the settings.local.php file
+  template:
+    src: "settings.local.php.j2"
+    dest: "/var/aegir/admin/web/settings.local.php"
+    owner: "www-data"
+    group: "www-data"
+    mode: 0644
