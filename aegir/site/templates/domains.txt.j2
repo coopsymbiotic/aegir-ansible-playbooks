@@ -1,6 +1,9 @@
 # {{ aegir_managed }}
 {% for item in groups['sites'] %}
-{% if hostvars[item]['site_status'] == 1 %}
+{% if hostvars[item]['site_status'] is defined and hostvars[item]['site_status'] == 1 %}
 {{ item }}{% if hostvars[item]['aliases']|length > 0 %} {{ hostvars[item]['aliases'] | join(' ') }}{% endif +%}
+{% else %}
+# Site disabled in Aegir
+# {{ item }}
 {% endif %}
 {% endfor %}
