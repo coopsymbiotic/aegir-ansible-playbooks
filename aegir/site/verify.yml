@@ -20,6 +20,12 @@
         path: "/etc/nginx/snippets/ciphers.conf"
       register: ciphers
 
+    - name: Generate an htpass file if http basic auth is enabled
+      include_tasks: "verify/htpasswd.yml"
+      when:
+        - http_basic_auth_username is defined
+        - http_basic_auth_username | length > 0
+
     - name: Create the nginx vhost
       template:
         src: "vhost-nginx.conf"
