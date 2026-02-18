@@ -120,7 +120,9 @@ if (!defined('DISABLE_WP_CRON')) {
  *
  * NB: this can be overridden by the site-specific wp-config.php.
  */
-$table_prefix  = 'wp_';
+if (empty($table_prefix)) {
+  $table_prefix  = 'wp_';
+}
 
 /**#@+
  * Authentication Unique Keys and Salts.
