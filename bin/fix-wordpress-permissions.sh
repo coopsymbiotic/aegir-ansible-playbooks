@@ -103,6 +103,6 @@ fi
 # Legacy CiviCRM directory
 if [ -d ./wp-content/plugins/files/civicrm ]; then
   chown -R aegir:www-data ./wp-content/plugins/files/civicrm/
-  chmod -R g+rs ./wp-content/plugins/files/civicrm/
-  find ./wp-content/plugins/files/civicrm/ -type d -exec chmod g+rs {} \;
+  chmod -R g+s ./wp-content/plugins/files/civicrm/
+  find ./wp-content/plugins/files/civicrm/ -type d -exec chmod g+s {} \;
 fi
