@@ -89,9 +89,9 @@ fi
 # - owner by aegir:www-data (so that Aegir can backup/delete files)
 # - www-data can write
 # - all directories are setgid to inherit group ownership
-chown -R aegir:www-data ./*
-chmod -R g+rw ./*
-find ./* -type d -exec chmod g+rs {} \;
+chown -R aegir:www-data ./wp-content/*
+chmod -R g+rw ./wp-content/*
+find ./wp-content/* -type d -exec chmod g+rs {} \;
 
 # Yootheme exception (ex: yootheme/cache, yootheme/css; yootheme is a mess..)
 if [ -d ./wp-content/themes/yootheme ]; then
