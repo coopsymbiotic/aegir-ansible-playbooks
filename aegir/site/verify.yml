@@ -98,6 +98,11 @@
     - name: Run CMS-specific tasks
       include_tasks: "verify/{{ software }}.yml"
 
+    - name: Make sure there is no lingering database.sql
+      file:
+        dest: "{{ site_path }}/database.sql"
+        state: absent
+
     - name: Run the post-verify command
       environment:
         AEGIR_SITE_ENVIRONMENT: "{{ site_environment }}"
