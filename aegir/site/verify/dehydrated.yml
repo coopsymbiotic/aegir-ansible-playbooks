@@ -19,4 +19,5 @@
   ignore_errors: true
 
 # Always display the output, often requires debugging
-- debug: var=certlog.stdout_lines
+# (remove?) not necessary, because for now we always run in debug mode
+# - debug: var=certlog.stdout_lines
