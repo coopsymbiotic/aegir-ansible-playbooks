@@ -1,5 +1,6 @@
 ---
 
+# Ignoring errors because the service might not exist
 - name: Stop and disable the CiviCRM and CMS cron services
   ansible.builtin.systemd:
     name: "{{ item }}"
@@ -11,6 +12,7 @@
     - "d7corecron_{{ site_shortname }}.service"
     - "d7civicron_{{ site_shortname }}.service"
   when: cms_cron_interval is defined and cms_cron_interval|int > 0
+  ignore_errors: yes
 
 - name: Delete the old timers/crons
   file:
