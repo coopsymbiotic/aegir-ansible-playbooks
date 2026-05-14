@@ -19,4 +19,5 @@
     path: /var/aegir/
     state: directory
     owner: "{{ aegir_user }}"
-    group: "{{ aegir_user }}"
+    group: "{{ aegir_web_group }}"
+    mode: "0750"
