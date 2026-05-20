@@ -7,6 +7,7 @@
       find:
         paths: "{{ publish_path }}/sites/"
         patterns: '*.*.*'
+        excludes: 'example.sites.php'
       register: emptyCheck
 
     - fail:
