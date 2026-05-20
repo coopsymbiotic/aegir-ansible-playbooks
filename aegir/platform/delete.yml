@@ -3,11 +3,15 @@
 - hosts: all
   tasks:
     # Basic check for now, better than nothing
+    # The excludes are mostly Drupal8/9-specific
     - name: Make sure the platform does not have any sites
       find:
         paths: "{{ publish_path }}/sites/"
         patterns: '*.*.*'
-        excludes: 'example.sites.php'
+        excludes:
+          - 'example.sites.php'
+          - 'example.settings.local.php'
+          - 'development.services.yml'
       register: emptyCheck
 
     - fail:
