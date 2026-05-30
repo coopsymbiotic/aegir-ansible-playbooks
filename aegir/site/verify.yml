@@ -121,8 +121,6 @@
         cmd: "/usr/local/bin/bee hosting-site-update-status --verified=1 {{ nid }}"
       register: result
       failed_when: "result.stdout != ''"
-      become: true
-      become_user: aegir
 
   handlers:
   - name: reload nginx
