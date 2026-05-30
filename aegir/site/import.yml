@@ -24,6 +24,8 @@
        when: not sqldump.stat.exists
 
      - name: Run the post-import command
+       become: true
+       become_user: "aegir"
        environment:
          AEGIR_SITE_ENVIRONMENT: "{{ site_environment }}"
        shell:
@@ -32,6 +34,8 @@
        when: hostvars[platform_name]['site_post_import_cmd'] | length > 0
 
      - name: Run provision-enable
+       become: true
+       become_user: "aegir"
        shell:
          chdir: "/var/aegir/admin/web"
          cmd: "/usr/local/bin/bee hosting-site-task {{ inventory_hostname }} enable"
