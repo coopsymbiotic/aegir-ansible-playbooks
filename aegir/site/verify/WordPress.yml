@@ -1,8 +1,8 @@
 ---
 
-- include_tasks: WordPress/settings.yml
+- include_tasks: "{{ software }}/settings.yml"
 
-- name: WordPress | Run fix permissions
+- name: Run fix permissions
   shell:
     chdir: "{{ site_path }}"
     cmd: "/usr/local/aegir-ansible-playbooks/bin/fix-wordpress-permissions.sh --force=1 --site-path='{{ site_path }}'"
@@ -112,17 +112,24 @@
   ignore_errors: yes
 
 # @todo Remove the cron if the CiviCRM plugin is disabled
-- include_tasks: WordPress/civicrm-cron.yml
-  when: "'civicrm_sites' in group_names"
+- include_tasks: "{{ software }}/civicrm-cron.yml"
+  when:
+    - "'civicrm_sites' in group_names"
+    - civicrm_ansible_cron_interval is defined
+    - civicrm_ansible_cron_interval|int > 0
+    - site_status|int == 1
   tags:
     - cron-civicrm
 
-- include_tasks: WordPress/cms-cron.yml
-  when: cms_cron_interval is defined and cms_cron_interval != "-1" and cms_cron_interval != "0"
+- include_tasks: "{{ software }}/cms-cron.yml"
+  when:
+    - cms_cron_interval is defined
+    - cms_cron_interval|int > 0
+    - site_status|int == 1
   tags:
     - cron-cms
 
-- include_tasks: WordPress/cms-cron-remove.yml
-  when: cms_cron_interval is undefined or cms_cron_interval == "-1" or cms_cron_interval == "0"
+- include_tasks: "{{ software }}/cms-cron-remove.yml"
+  when: cms_cron_interval is undefined or cms_cron_interval|int <= 0 or site_status|int != 1
   tags:
     - cron-cms
