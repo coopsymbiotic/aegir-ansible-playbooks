@@ -32,3 +32,8 @@
       shell:
         chdir: "/var/aegir/admin/web"
         cmd: "/usr/local/bin/bee hosting-site-update-status --status=-2 {{ nid }}"
+
+  handlers:
+  - name: reload systemd
+    systemd:
+      daemon_reload: yes
