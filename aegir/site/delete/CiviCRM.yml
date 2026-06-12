@@ -9,3 +9,9 @@
   file:
     path: "{{ site_root }}/sites/{{ inventory_hostname }}/"
     state: absent
+
+# This should be done by Verify, which is run after Disable
+# but a site can also be Deleted without being disabled
+- include_tasks: verify/Drupal7/civicrm-cron-remove.yml
+  tags:
+    - cron-civicrm
