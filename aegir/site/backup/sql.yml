@@ -1,22 +1,15 @@
 ---
 
-- name: Drupal10 | Generate a database dump
-  shell:
-    chdir: "{{ site_path }}"
-    cmd: "drush -l {{ inventory_hostname }} sql-dump --result-file={{ site_path }}/database.sql"
-    creates: "{{ site_path }}/database.sql"
-  become: true
-  become_user: aegir
-  when: software == "Drupal10"
-
-- name: Drupal7 | Generate a database dump
+# This used to be slightly different to use "drush -l fqdn" but now that
+# we have a wrapper for drush, the command is identical on Drupal 7 to 11
+- name: Drupal | Generate a database dump
   shell:
     chdir: "{{ site_path }}"
     cmd: "drush sql-dump --result-file={{ site_path }}/database.sql"
     creates: "{{ site_path }}/database.sql"
   become: true
   become_user: aegir
-  when: software == "Drupal7"
+  when: software[:6] == "Drupal"
 
 - name: Backdrop | Generate a database dump
   shell:
