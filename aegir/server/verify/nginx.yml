@@ -43,3 +43,9 @@
     - nginx_vhost_common.conf
     - nginx_vhost_aegir.conf
     - nginx_vhost_robotstxt.conf
+
+- name: Make sure that the default vhost from nginx is absent
+  ansible.builtin.file
+  file:
+    path: "/etc/nginx/sites-enabled/default"
+    state: absent
