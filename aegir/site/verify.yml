@@ -61,13 +61,34 @@
     - name: Force the nginx reload to happen now so that the well-known route works
       meta: flush_handlers
 
+    # Assumes foo.example.org
+    - name: Extract the top-level domain for the wildcard cert check
+      set_fact:
+        base_domain: "{{ inventory_hostname.split('.')[1:] | join('.') }}"
+
+    # Assumes that we use certbot for wildcard certs, dehydrated for non-wildcard certs
+    # or, worst case, it assumes that there is no site example.org on a server that hosts
+    # sites for *.example.org (and not using a wildcard)
+    - name: Check if a wildcard cert exists
+      stat:
+        path: "/etc/letsencrypt/live/{{ base_domain }}/fullchain.pem"
+      register: wildcardcert
+
     - name: Run dehydrated
       include_tasks: "verify/dehydrated.yml"
+      when: not wildcardcert.stat.exists
 
     - name: Check again if the http cert exists
       stat:
         path: "/var/lib/dehydrated/certs/{{ inventory_hostname }}/fullchain.pem"
       register: cert
+      when: not wildcardcert.stat.exists
+
+    # A skipped task would still register the var, so we need two vars, and use the valid one
+    # this is checked in the vhost template
+    - name: Set fact for the found certificate
+      set_fact:
+        cert: "{{ cert if cert.skipped is not defined else wildcardcert }}"
 
     - name: Update the nginx vhost again for https
       template:
