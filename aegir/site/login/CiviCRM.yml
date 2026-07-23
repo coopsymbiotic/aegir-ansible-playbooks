@@ -6,5 +6,5 @@
   become_user: aegir
   shell:
     chdir: "{{ site_path }}"
-    cmd: "env CIVICRM_SETTINGS='/var/aegir/platforms/standalone/private/{{ inventory_hostname }}/civicrm.settings.php' cv url civicrm/dashboard --login --user=admin"
+    cmd: "cv url civicrm/dashboard --login --user=admin"
   register: onetime
