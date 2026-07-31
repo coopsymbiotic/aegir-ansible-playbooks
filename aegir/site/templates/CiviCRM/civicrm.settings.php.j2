@@ -224,8 +224,13 @@ if (!defined('CIVICRM_LOGGING_DSN')) {
  */
 {# We assume that the Ansible inventory strips trailing slashes from the site_root and site_path #}
 {# Sometimes having too many, or not enough slashes, confuses CiviCRM or the CMS #}
-{% if software == 'Drupal10' or software == 'Drupal9' %}
+{% if software == 'Drupal10' %}
 $civicrm_root = '{{ site_root | dirname }}/vendor/civicrm/civicrm-core/';
+if (!defined('CIVICRM_TEMPLATE_COMPILEDIR')) {
+  define('CIVICRM_TEMPLATE_COMPILEDIR', '{{ site_path }}/private/files/civicrm/templates_c');
+}
+{% elif software == 'Drupal9' %}
+$civicrm_root = '{{ site_root }}/vendor/civicrm/civicrm-core/';
 if (!defined('CIVICRM_TEMPLATE_COMPILEDIR')) {
   define('CIVICRM_TEMPLATE_COMPILEDIR', '{{ site_path }}/private/files/civicrm/templates_c');
 }
