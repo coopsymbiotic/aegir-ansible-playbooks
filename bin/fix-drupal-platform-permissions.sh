@@ -12,7 +12,7 @@ provide the following arguments:
   --web-group: Web server group name (defaults to 'www-data').
 
 Usage: (sudo) ${0##*/} --root=PATH --script-user=USER --web_group=GROUP
-Example: (sudo) ${0##*/} --drupal_path=/var/aegir/platforms/drupal-7.50 --script-user=aegir --web-group=www-data
+Example: (sudo) ${0##*/} --root=/var/aegir/platforms/drupal-10/web --script-user=aegir --web-group=www-data
 HELP
 exit 0
 }
@@ -47,7 +47,7 @@ while [ "$#" -gt 0 ]; do
 done
 
 if [ -z "${drupal_root}" ] || [ ! -f "${drupal_root}/core/modules/system/system.module" ] && [ ! -f "${drupal_root}/modules/system/system.module" ]; then
-  printf "Error: Please provide a valid Drupal root directory.\n"
+  printf "Error: Please provide a valid Drupal root directory. For D10+ you need to include the /web/ in the path.\n"
   exit 1
 fi
 
