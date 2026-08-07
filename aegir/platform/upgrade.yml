@@ -1,0 +1,16 @@
+---
+
+- hosts: all
+  vars:
+    aegir_user: aegir
+  tasks:
+    - name: Git pull the platform codebase
+      ansible.builtin.command: "git pull"
+      args:
+        chdir: "{{ publish_path }}"
+      become: true
+      become_user: "{{ aegir_user }}"
+
+# TODO
+#    - name: Run CMS-specific tasks
+#      include_tasks: "upgrade/{{ software }}.yml"
