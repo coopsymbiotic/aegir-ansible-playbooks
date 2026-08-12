@@ -1,26 +1,26 @@
 ---
 
-# Remove the WordPress core cron
+# Remove the Drupal10 core cron
 
 - name: Check if the cms core cron currently exists
   stat:
-    path: "/etc/systemd/system/wpcorecron_{{ site_shortname }}.service"
+    path: "/etc/systemd/system/d7corecron_{{ site_shortname }}.service"
   register: timer
 
 - name: Stop the cms core cron timer
   systemd:
-    name: "wpcorecron_{{ site_shortname }}.timer"
+    name: "d7corecron_{{ site_shortname }}.timer"
     state: stopped
   when: timer.stat.exists
 
 - name: Delete the cms core cron service
   file:
-    path: "/etc/systemd/system/wpcorecron_{{ site_shortname }}.service"
+    path: "/etc/systemd/system/d7corecron_{{ site_shortname }}.service"
     state: absent
 
 - name: Delete the cms core cron timer
   file:
-    path: "/etc/systemd/system/wpcorecron_{{ site_shortname }}.timer"
+    path: "/etc/systemd/system/d7corecron_{{ site_shortname }}.timer"
     state: absent
   notify: reload systemd
 

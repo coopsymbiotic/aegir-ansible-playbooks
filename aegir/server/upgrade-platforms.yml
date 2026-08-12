@@ -1,0 +1,10 @@
+---
+
+- name: "Upgrade all platforms"
+  hosts: all
+  tasks:
+    - name: Queue upgrades for all platforms
+      shell:
+        chdir: "/var/aegir/admin/web"
+        cmd: "/usr/local/bin/bee hosting-server-upgrade-platforms"
+
