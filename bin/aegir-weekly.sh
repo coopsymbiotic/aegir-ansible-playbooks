@@ -117,17 +117,6 @@ action() {
   User="/var/aegir"
 
   _THIS_U='aegir'
-  _THIS_HM_SITE=$(cat /var/aegir/.drush/hostmaster.alias.drushrc.php \
-    | grep "site_path'" \
-    | cut -d: -f2 \
-    | awk '{ print $3}' \
-    | sed "s/[\,']//g" 2>&1)
-  _THIS_HM_PLR=$(cat /var/aegir/.drush/hostmaster.alias.drushrc.php \
-    | grep "root'" \
-    | cut -d: -f2 \
-    | awk '{ print $3}' \
-    | sed "s/[\,']//g" 2>&1)
-
   _DOW=$(date +%u 2>&1)
   _DOW=${_DOW//[^1-7]/}
   count
