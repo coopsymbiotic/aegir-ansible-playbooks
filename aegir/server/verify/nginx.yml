@@ -2,6 +2,7 @@
 
 # nb: this is also included from 'aegir/admin/install/vhost.yml'
 # hence the templates directory is under here too
+# todo: could most of the admin/install instead become server->verify?
 
 # This was previously under /var/aegir/config/nginx.conf
 # but we are trying to be a bit more standard and eventually phase out /var/aegir/conf
