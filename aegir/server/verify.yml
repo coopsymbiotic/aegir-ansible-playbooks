@@ -16,6 +16,7 @@
         state: "link"
       with_items:
         - cvlog
+        - aegir-weekly.sh
 
 # todo:
 # - validate MySQL credentials
