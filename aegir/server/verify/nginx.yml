@@ -45,6 +45,14 @@
     - nginx_vhost_aegir.conf
     - nginx_vhost_robotstxt.conf
 
+- name: Generate nginx_vhost_common for the default server PHP version
+  ansible.builtin.template:
+    src: "nginx_vhost_common.conf.j2"
+    dest: "/var/aegir/config/includes/nginx_vhost_common-php{{ phpversion }}.conf"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+
 - name: Make sure that the default vhost from nginx is absent
   ansible.builtin.file:
     path: "/etc/nginx/sites-enabled/default"
