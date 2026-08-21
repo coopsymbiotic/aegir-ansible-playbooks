@@ -5,6 +5,14 @@
     - name: Run CMS-specific tasks
       include_tasks: "verify/{{ software }}.yml"
 
+    - name: Generate nginx_vhost_common for the PHP version of the platform
+      ansible.builtin.template:
+        src: "../server/verify/templates/nginx_vhost_common.conf.j2"
+        dest: "/var/aegir/config/includes/nginx_vhost_common-php{{ phpversion }}.conf"
+        owner: "root"
+        group: "root"
+        mode: "0644"
+
     - name: Update the platform status
       shell:
         chdir: "/var/aegir/admin/web"
