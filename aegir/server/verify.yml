@@ -20,5 +20,10 @@
         - cvlog
         - aegir-weekly.sh
 
+    - name: Run provision-verify on the Aegir frontend
+      shell:
+        chdir: "/var/aegir/admin/web"
+        cmd: "/usr/local/bin/bee hosting-site-task {{ aegir_frontend }} verify"
+
 # todo:
 # - validate MySQL credentials
