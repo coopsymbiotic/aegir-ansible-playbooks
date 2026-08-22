@@ -1,0 +1,23 @@
+---
+
+- name: "Upgrade Aegir"
+  hosts: all
+  vars:
+    aegir_user: aegir
+  tasks:
+    - name: Update the hosting module using git pull
+      ansible.builtin.command: "git pull"
+      args:
+        chdir: "/var/aegir/admin/web/modules/hosting"
+      become: true
+      become_user: "{{ aegir_user }}"
+
+    - name: Update the Aegir site database
+      shell:
+        chdir: "/var/aegir/admin/web"
+        cmd: "/usr/local/bin/bee updb -y"
+
+    - name: Queue a server verify task
+      shell:
+        chdir: "/var/aegir/admin/web"
+        cmd: "/usr/local/bin/bee hosting-server-verify"
