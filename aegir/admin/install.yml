@@ -12,6 +12,13 @@
     bee_version: 1.x-1.2.0
     aegir_managed: "Managed by Aegir"
   tasks:
+    - name: Get the default PHP version
+      command: php -r 'echo PHP_MAJOR_VERSION . "." . PHP_MINOR_VERSION;'
+      register: php_version_output
+
+    - ansible.builtin.set_fact:
+        phpversion: "{{ php_version_output.stdout }}"
+
     - name: Install base OS dependencies
       include_tasks: "install/debian.yml"
       tags: admin-install-debian

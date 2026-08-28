@@ -112,6 +112,14 @@ if (!defined('DISABLE_WP_CRON')) {
   define('DISABLE_WP_CRON', true);
 }
 
+/** coopsymbiotic/ops#677 Disable File/Plugin/Theme Editing From within WordPress **/
+if (!defined('DISALLOW_FILE_EDIT')) {
+  define('DISALLOW_FILE_EDIT', true);
+}
+if (!defined('DISALLOW_FILE_MODS')) {
+  define('DISALLOW_FILE_MODS', true);
+}
+
 /**
  * WordPress Database Table prefix.
  *
