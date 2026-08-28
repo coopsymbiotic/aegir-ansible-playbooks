@@ -11,6 +11,8 @@
         chdir: "/var/aegir/admin/web/modules/hosting"
       become: true
       become_user: "{{ aegir_user }}"
+      notify:
+        - reload hosting-queued
 
     - name: Update the Aegir site database
       shell:
@@ -21,3 +23,9 @@
       shell:
         chdir: "/var/aegir/admin/web"
         cmd: "/usr/local/bin/bee hosting-server-verify"
+
+  handlers:
+  - name: restart hosting-queued
+    ansible.builtin.service:
+      name: hosting-queued
+      state: restarted
