@@ -1,7 +1,29 @@
 ---
 
-- name: bee | Download bee
+# This file is also included from aegir/server/upgrade-aegir
+
+- name: Get latest bee release info from GitHub
+  uri:
+    url: https://api.github.com/repos/backdrop-contrib/bee/releases/latest
+    return_content: true
+  register: bee_release
+
+- name: Set bee version fact
+  set_fact:
+    bee_version: "{{ bee_release.json.tag_name }}"
+
+- name: Check if bee needs to be installed or upgraded
+  stat:
+    path: "/usr/local/bin/.bee-{{ bee_version }}.txt"
+  register: p
+
+- name: Deploy bee.phar
   get_url:
-    url="https://github.com/backdrop-contrib/bee/releases/download/{{ bee_version }}/bee.phar"
-    dest="/usr/local/bin/bee"
-    mode=0755
+    url: "https://github.com/backdrop-contrib/bee/releases/download/{{ bee_version }}/bee.phar"
+    dest: /usr/local/bin/bee
+    mode: '0755'
+  when: p.stat.exists == False
+
+- name: Keep track of the installed bee version
+  shell: "touch /usr/local/bin/.bee-{{ bee_version }}.txt"
+  when: p.stat.exists == False

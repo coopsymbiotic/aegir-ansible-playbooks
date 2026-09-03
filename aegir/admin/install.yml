@@ -35,7 +35,12 @@
       include_tasks: "install/user.yml"
 
     - name: Download bee
-      include_tasks: "install/bee.yml"
+      include_tasks:
+        file: "install/bee.yml"
+        apply:
+          tags: admin-install-bee
+      tags:
+        - admin-install-bee
 
     - name: Download the platform
       include_tasks: "install/platform.yml"

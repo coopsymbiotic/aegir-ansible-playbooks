@@ -4,7 +4,10 @@
   hosts: all
   vars:
     aegir_user: aegir
+    bee_version: 1.x-1.2.0
   tasks:
+    - include_tasks: "../admin/install/bee.yml"
+
     - name: Update the hosting module using git pull
       ansible.builtin.command: "git pull"
       args:
@@ -12,7 +15,7 @@
       become: true
       become_user: "{{ aegir_user }}"
       notify:
-        - reload hosting-queued
+        - restart hosting-queued
 
     - name: Update the Aegir site database
       shell:
