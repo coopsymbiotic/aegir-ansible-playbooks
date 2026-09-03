@@ -9,7 +9,6 @@
     aegir_db_name: aegir
     aegir_db_host: localhost
     aegir_admin_email: fixme@example.org
-    bee_version: 1.x-1.2.0
     aegir_managed: "Managed by Aegir"
   tasks:
     - name: Get the default PHP version

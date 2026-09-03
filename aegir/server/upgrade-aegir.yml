@@ -4,7 +4,6 @@
   hosts: all
   vars:
     aegir_user: aegir
-    bee_version: 1.x-1.2.0
   tasks:
     - include_tasks: "../admin/install/bee.yml"
 
