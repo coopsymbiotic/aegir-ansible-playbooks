@@ -4,13 +4,16 @@
   hosts: all
   vars:
     aegir_user: aegir
+    aegir_home: /var/aegir
   tasks:
     - include_tasks: "../admin/install/bee.yml"
+
+    - include_tasks: "upgrade-aegir/backdrop-core.yml"
 
     - name: Update the hosting module using git pull
       ansible.builtin.command: "git pull"
       args:
-        chdir: "/var/aegir/admin/web/modules/hosting"
+        chdir: "{{ aegir_home }}/admin/web/modules/hosting"
       become: true
       become_user: "{{ aegir_user }}"
       notify:
@@ -18,12 +21,26 @@
 
     - name: Update the Aegir site database
       shell:
-        chdir: "/var/aegir/admin/web"
+        chdir: "{{ aegir_home }}/admin/web"
         cmd: "/usr/local/bin/bee updb -y"
+      become_user: "{{ aegir_user }}"
+
+    # We never set the maintenance mode, but if the db upgrade fails, it will set it
+    - name: Take site out of maintenance mode
+      shell:
+        chdir: "{{ aegir_home }}/admin/web"
+        cmd: "/usr/local/bin/bee maintenance-mode 0"
+      become_user: "{{ aegir_user }}"
+
+    - name: Clear Backdrop caches
+      shell:
+        chdir: "{{ aegir_home }}/admin/web"
+        cmd: "/usr/local/bin/bee cc all"
+      become_user: "{{ aegir_user }}"
 
     - name: Queue a server verify task
       shell:
-        chdir: "/var/aegir/admin/web"
+        chdir: "{{ aegir_home }}/admin/web"
         cmd: "/usr/local/bin/bee hosting-server-verify"
 
   handlers:

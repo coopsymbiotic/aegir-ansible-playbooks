@@ -2,11 +2,13 @@
 
 # This file is also included from aegir/server/upgrade-aegir
 
+# Using no_log because we run in verbose mode, and this will show false warnings in the log
 - name: Get latest bee release info from GitHub
   uri:
     url: https://api.github.com/repos/backdrop-contrib/bee/releases/latest
     return_content: true
   register: bee_release
+  no_log: true
 
 - name: Set bee version fact
   set_fact:
