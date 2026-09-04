@@ -17,6 +17,8 @@
       include_tasks: "install/{{ software }}.yml"
 
     - name: Run the post-install command
+      become: true
+      become_user: "www-data"
       environment:
         AEGIR_SITE_ENVIRONMENT: "{{ site_environment }}"
       shell:
