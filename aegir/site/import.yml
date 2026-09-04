@@ -2,42 +2,42 @@
 
 - hosts: all
   tasks:
-     - name: Create the new MySQL database and user
-       include_tasks: "install/mysql.yml"
- 
-     - name: Test if a database.sql file already exists (clone or remote-import)
-       stat:
-         path: "{{ site_path }}/database.sql"
-       register: sqldump
- 
-     - name: Update CMS-specific settings
-       include_tasks: "verify/{{ software }}/settings.yml"
-       when: sqldump.stat.exists
- 
-     - name: Import the SQL dump
-       include_tasks: "restore/sql.yml"
-       when: sqldump.stat.exists
+    - name: Create the new MySQL database and user
+      include_tasks: "install/mysql.yml"
 
-     - name: SQL dump missing
-       debug:
-         msg: "Warning: The SQL dump is missing, not imported"
-       when: not sqldump.stat.exists
+    - name: Test if a database.sql file already exists (clone or remote-import)
+      stat:
+        path: "{{ site_path }}/database.sql"
+      register: sqldump
 
-     - name: Run the post-import command
-       become: true
-       become_user: "www-data"
-       environment:
-         AEGIR_SITE_ENVIRONMENT: "{{ site_environment }}"
-       shell:
-         cmd: "{{ hostvars[platform_name]['site_post_import_cmd'] }}"
-         chdir: "{{ site_path }}"
-       when: hostvars[platform_name]['site_post_import_cmd'] | length > 0
+    - name: Update CMS-specific settings
+      include_tasks: "verify/{{ software }}/settings.yml"
+      when: sqldump.stat.exists
 
-     - name: Run provision-enable
-       become: true
-       become_user: "aegir"
-       shell:
-         chdir: "/var/aegir/admin/web"
-         cmd: "/usr/local/bin/bee hosting-site-task {{ inventory_hostname }} enable"
-       # @todo 'bee' does not return errors, validate output
-       # failed_when: "'^\\d+' not in result.stdout"
+    - name: Import the SQL dump
+      include_tasks: "restore/sql.yml"
+      when: sqldump.stat.exists
+
+    - name: SQL dump missing
+      debug:
+        msg: "Warning: The SQL dump is missing, not imported"
+      when: not sqldump.stat.exists
+
+    - name: Run the post-import command
+      become: true
+      become_user: "www-data"
+      environment:
+        AEGIR_SITE_ENVIRONMENT: "{{ site_environment }}"
+      shell:
+        cmd: "{{ hostvars[platform_name]['site_post_import_cmd'] }}"
+        chdir: "{{ site_path }}"
+      when: hostvars[platform_name]['site_post_import_cmd'] | length > 0
+
+    - name: Run provision-enable
+      become: true
+      become_user: "aegir"
+      shell:
+        chdir: "/var/aegir/admin/web"
+        cmd: "/usr/local/bin/bee hosting-site-task {{ inventory_hostname }} enable"
+      # @todo 'bee' does not return errors, validate output
+      # failed_when: "'^\\d+' not in result.stdout"
