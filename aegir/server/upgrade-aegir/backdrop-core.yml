@@ -44,6 +44,7 @@
     dest: "{{ temp_dir.path }}"
     remote_src: true
   when: backdrop_upgrade_needed
+  no_log: true
 
 - name: Remove old core directory
   file:
