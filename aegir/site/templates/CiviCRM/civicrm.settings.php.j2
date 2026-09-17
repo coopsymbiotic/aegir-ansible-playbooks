@@ -99,9 +99,12 @@ $civicrm_paths['civicrm.files']['path'] = '{{ site_path }}/files/civicrm';
 $civicrm_paths['civicrm.private']['path'] = '{{ site_path }}/files/civicrm';
 {% elif software == 'WordPress' %}
 $civicrm_paths['civicrm.private']['path'] = '{{ site_path }}/wp-content/uploads/civicrm';
-$civicrm_paths['wp.frontend.base']['url'] = 'https://{{ inventory_hostname }}/';
-$civicrm_paths['wp.backend.base']['url'] = 'https://{{ inventory_hostname }}/wp-admin/';
-$civicrm_setting['domain']['userFrameworkResourceURL'] = 'https://{{ inventory_hostname }}/sites/{{ inventory_hostname }}/wp-content/plugins/civicrm/civicrm';
+// Using SERVER_NAME helps with WordPress multisite (site1.example.org vs www.example.org)
+// see also wp-config.php
+$civicrm_paths['wp.frontend.base']['url'] = 'https://' . $_SERVER['SERVER_NAME'] . '/';
+$civicrm_paths['wp.backend.base']['url'] = 'https://' . $_SERVER['SERVER_NAME'] . '/wp-admin/';
+// The 'sites/example.org' must still be hardcoded, because that is the only path on disk
+$civicrm_setting['domain']['userFrameworkResourceURL'] = 'https://' . $_SERVER['SERVER_NAME'] '/sites/{{ inventory_hostname }}/wp-content/plugins/civicrm/civicrm';
 {% endif %}
 
 // Force Clean URLs to prevent bad Civi multilingual urls
@@ -115,16 +118,16 @@ define('CIVICRM_CLEANURL', 1);
 $civicrm_paths['civicrm.private']['path'] = '{{ site_root | dirname }}/private/{{ inventory_hostname }}/';
 $civicrm_paths['cms.root']['path'] = '{{ site_root }}';
 $civicrm_paths['civicrm.files']['path'] = '{{ site_path }}/upload/';
-$civicrm_paths['civicrm.files']['url'] = 'https://{{ inventory_hostname }}/sites/{{ inventory_hostname }}/upload/';
-$civicrm_paths['civicrm.core']['url'] = 'https://{{ inventory_hostname }}/public/assets/core/';
+$civicrm_paths['civicrm.files']['url'] = 'https://' . $_SERVER['SERVER_NAME'] . '/sites/{{ inventory_hostname }}/upload/';
+$civicrm_paths['civicrm.core']['url'] = 'https://' . $_SERVER['SERVER_NAME'] . '/public/assets/core/';
 $civicrm_paths['civicrm.core']['path'] = '{{ site_root }}/public/assets/core/';
-$civicrm_paths['civicrm.vendor']['url'] = 'https://{{ inventory_hostname }}/core/vendor/';
+$civicrm_paths['civicrm.vendor']['url'] = 'https://' . $_SERVER['SERVER_NAME'] . '/core/vendor/';
 $civicrm_paths['civicrm.vendor']['path'] = '{{ site_root }}/public/assets/core/';
-$civicrm_paths['civicrm.bower']['url'] = 'https://{{ inventory_hostname }}/public/assets/core/bower_components/';
+$civicrm_paths['civicrm.bower']['url'] = 'https://' . $_SERVER['SERVER_NAME'] . '/public/assets/core/bower_components/';
 $civicrm_paths['civicrm.bower']['path'] = '{{ site_root | dirname }}/vendor/civicrm/civicrm-core/bower_components/';
-$civicrm_paths['civicrm.packages']['url'] = 'https://{{ inventory_hostname }}/public/assets/packages/';
+$civicrm_paths['civicrm.packages']['url'] = 'https://' . $_SERVER['SERVER_NAME'] . '/public/assets/packages/';
 $civicrm_paths['civicrm.packages']['path'] = '{{ site_root | dirname }}/vendor/civicrm/civicrm-packages/';
-$civicrm_setting['domain']['userFrameworkResourceURL'] = 'https://{{ inventory_hostname }}/public/assets/core/';
+$civicrm_setting['domain']['userFrameworkResourceURL'] = 'https://' . $_SERVER['SERVER_NAME'] . '/public/assets/core/';
 {% endif %}
 
 /**
@@ -314,7 +317,7 @@ if (!defined('CIVICRM_TEMPLATE_COMPILE_CHECK')) {
  *
  */
 if (!defined('CIVICRM_UF_BASEURL')) {
-  define('CIVICRM_UF_BASEURL', 'https://{{ inventory_hostname }}');
+  define('CIVICRM_UF_BASEURL', 'https://' . $_SERVER['SERVER_NAME']);
 }
 
 /**
