@@ -104,7 +104,7 @@ $civicrm_paths['civicrm.private']['path'] = '{{ site_path }}/wp-content/uploads/
 $civicrm_paths['wp.frontend.base']['url'] = 'https://' . $_SERVER['SERVER_NAME'] . '/';
 $civicrm_paths['wp.backend.base']['url'] = 'https://' . $_SERVER['SERVER_NAME'] . '/wp-admin/';
 // The 'sites/example.org' must still be hardcoded, because that is the only path on disk
-$civicrm_setting['domain']['userFrameworkResourceURL'] = 'https://' . $_SERVER['SERVER_NAME'] '/sites/{{ inventory_hostname }}/wp-content/plugins/civicrm/civicrm';
+$civicrm_setting['domain']['userFrameworkResourceURL'] = 'https://' . $_SERVER['SERVER_NAME'] . '/sites/{{ inventory_hostname }}/wp-content/plugins/civicrm/civicrm';
 {% endif %}
 
 // Force Clean URLs to prevent bad Civi multilingual urls
