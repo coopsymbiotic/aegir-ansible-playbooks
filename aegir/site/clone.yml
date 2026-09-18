@@ -9,6 +9,8 @@
         mode: 0750
 
     - include_tasks: "backup/sql.yml"
+      vars:
+        sql_dump_gzip: false
 
     # Using no_log here to reduce the warnings in the Ansible logs
     - name: rsync the site to the new location
