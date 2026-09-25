@@ -13,6 +13,8 @@
         mode: 0750
 
     - include_tasks: "backup/sql.yml"
+      vars:
+        sql_dump_gzip: true
 
     - name: Drupal10 | Run fix permissions
       shell:
