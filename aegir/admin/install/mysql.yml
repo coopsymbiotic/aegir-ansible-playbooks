@@ -4,6 +4,9 @@
   shell: pwgen 15 1
   register: aegirpass
 
+# The file will exist already, even for a blank Backdrop install
+# so we grep for a specific string that is there in the stock file
+# as a placeholder
 - name: "Check if Backdrop has been installed already"
   shell:
     cmd: grep -q database_name /var/aegir/admin/web/settings.php
@@ -16,7 +19,7 @@
     login_unix_socket: /var/run/mysqld/mysqld.sock
     name: "{{ aegir_db_name }}"
     state: present
-  when: settings.rc == 0
+  when: settings.rc|int == 0
 
 - name: Create the MySQL user
   mysql_user:
@@ -27,4 +30,4 @@
       '{{ aegir_db_name }}.*:ALL'
     column_case_sensitive: true
     state: present
-  when: settings.rc == 0
+  when: settings.rc|int == 0
