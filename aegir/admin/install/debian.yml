@@ -8,7 +8,7 @@
     - pwgen
     - python3-pymysql
 
-# @todo maybe we should just use the Debian package, but it has a lot of dependencies and it is old
+# The Debian package is usually too old and too many dependencies
 - name: Download and install the latest Composer
   shell: curl -sS https://getcomposer.org/installer | php
   args:
