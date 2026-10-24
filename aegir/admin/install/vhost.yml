@@ -17,6 +17,7 @@
     path: "/etc/nginx/params.4096"
   register: dhparams
 
+# Force a restart, sometimes the https cert fails
 - name: Create the nginx vhost
   template:
     src: "vhost-nginx.conf"
@@ -25,7 +26,7 @@
     group: root
     mode: 0644
   notify:
-    - reload nginx
+    - restart nginx
 
 - name: Generate an https certificate
   shell:
