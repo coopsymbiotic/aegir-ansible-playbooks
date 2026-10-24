@@ -126,7 +126,7 @@
 
     - name: Run the post-verify command
       become: true
-      become_user: "aegir"
+      become_user: "www-data"
       environment:
         AEGIR_SITE_ENVIRONMENT: "{{ site_environment }}"
       shell:

@@ -17,6 +17,7 @@
         src: "{{ site_path }}/"
         dest: "{{ new_site_root }}/sites/{{ new_uri }}"
         archive: true
+        compress: false
       no_log: true
 
     # Has to be done before creating the MySQL user, so that we can store the new MySQL credentials

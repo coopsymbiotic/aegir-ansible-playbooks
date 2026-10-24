@@ -2,7 +2,7 @@
 
 - name: Delete the private directory
   file:
-    path: "{{ site_root + '/../private' | realpath }}/{{ inventory_hostname }}/"
+    path: "{{ site_root }}/../private/{{ inventory_hostname }}"
     state: absent
 
 - name: Delete the public directory

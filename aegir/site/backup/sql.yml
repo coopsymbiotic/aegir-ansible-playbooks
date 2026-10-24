@@ -42,3 +42,9 @@
     cmd: "perl -i -pe 's#\\/\\*\\!5001[7|3].*?`[^\\*]*\\*\\/##g;' -pe 's/DEFINER=[^ ]+//g' ./database.sql"
   become: true
   become_user: aegir
+
+- name: Compress the database dump
+  ansible.builtin.shell:
+    chdir: "{{ site_path }}"
+    cmd: "gzip database.sql"
+  when: sql_dump_gzip | default(true)

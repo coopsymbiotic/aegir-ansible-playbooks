@@ -43,5 +43,8 @@ if (!defined('WP_CONTENT_DIR')) {
   define('WP_CONTENT_DIR', "{{ site_path }}/wp-content");
 }
 if (!defined('WP_CONTENT_URL')) {
-  define('WP_CONTENT_URL', "https://{{ inventory_hostname }}/sites/{{ inventory_hostname }}/wp-content");
+  // Using SERVER_NAME helps with WordPress multisite (site1.example.org vs www.example.org)
+  // Assumes that we have a wp-cli.yml for the CLI
+  // See also civicrm.settings.php
+  define('WP_CONTENT_URL', "https://" . $_SERVER['SERVER_NAME'] . "/sites/{{ inventory_hostname }}/wp-content");
 }
