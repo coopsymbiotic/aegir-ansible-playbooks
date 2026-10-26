@@ -1,0 +1,19 @@
+---
+
+- name: Make sure that the upload directory exists
+  file:
+    path: "{{ site_root|dirname }}/private/{{ inventory_hostname }}/moodledata"
+    state: directory
+    owner: "aegir"
+    group: "www-data"
+    mode: "0770"
+
+# FIXME: for now, we support only one site per platform
+# We will likely change this to support multi-site
+- name: Create the config.php
+  template:
+    src: "Moodle/config.php.j2"
+    dest: "{{ site_root }}/config.php"
+    owner: aegir
+    group: www-data
+    mode: 0440
