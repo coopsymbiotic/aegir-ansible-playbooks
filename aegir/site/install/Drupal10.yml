@@ -42,10 +42,14 @@
   register: civicheck
 
 - name: Install CiviCRM
+  become: true
+  become_user: aegir
   shell:
     chdir: "{{ site_path }}"
     cmd: "cv core:install --cms-base-url=https://{{ inventory_hostname }}/ --lang={{ language }}"
     creates: "{{ site_path }}/civicrm.settings.php"
+  environment:
+    AEGIR_PHP_VERSION: "{{ phpversion }}"
 
 - name: Change the site directory permissions back to normal
   file:

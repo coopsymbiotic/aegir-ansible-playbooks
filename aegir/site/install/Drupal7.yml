@@ -13,6 +13,8 @@
     chdir: "{{ site_path }}"
     cmd: "drush -y site-install {{ profile }} --db-url=mysql://{{ db_name }}:{{ db_passwd }}@{{ db_host }}:{{ db_port }}/{{ db_name}} --site-name={{ inventory_hostname }} --sites-subdir={{ inventory_hostname }} --site-mail=fixme@example.org --locale={{ language[:2] }}"
     creates: "{{ site_path }}/settings.php"
+  environment:
+    DRUSH_PHP: "/usr/bin/php{{ phpversion }}"
 
 - name: Make sure that the files directory exists
   file:
@@ -40,6 +42,8 @@
   register: civicheck
 
 - name: Install CiviCRM
+  become: true
+  become_user: aegir
   shell:
     chdir: "{{ site_path }}"
     cmd: "cv core:install --cms-base-url=https://{{ inventory_hostname }}/ --lang={{ language }}"
