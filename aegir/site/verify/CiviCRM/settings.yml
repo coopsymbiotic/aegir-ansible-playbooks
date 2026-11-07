@@ -15,3 +15,9 @@
     group: www-data
     mode: 0440
 #   when: civicrm_site_key is defined
+
+# This helps for when doing migrations from Drupal to Standalone
+- name: Make sure there is no lingering old settings file
+  file:
+    path: "{{ site_root }}/sites/{{ inventory_hostname }}/civicrm.settings.php"
+    state: absent
