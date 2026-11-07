@@ -17,12 +17,16 @@ exit 0
 }
 
 site_path=`pwd`
+force=''
 
 # Parse Command Line Arguments
 while [ "$#" -gt 0 ]; do
   case "$1" in
     --site-path=*)
         site_path="${1#*=}"
+        ;;
+    --force)
+        force=1
         ;;
     --help) print_help;;
     *)
@@ -33,8 +37,12 @@ while [ "$#" -gt 0 ]; do
 done
 
 # Validate it is a valid directory
-if [ -z "${site_path}" ] || [ ! -d "${site_path}/upload" ] ; then
+if [ -z "${site_path}" ]; then
   printf "Error: Please provide a valid Standalone site directory.\n"
+  exit 1
+fi
+if [ ! -d "${site_path}/upload" ] && [ -z $force ]; then
+  printf "Error: Please provide a valid Standalone site directory or use --force.\n"
   exit 1
 fi
 
